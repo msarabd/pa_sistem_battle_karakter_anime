@@ -1,0 +1,935 @@
+#include <iostream>
+#include <iomanip>
+#include <cstdlib>
+#include <string>
+#include <limits>
+using namespace std;
+
+const int max_karakter = 200;
+const int max_akun = 20;
+
+struct stat{
+    double ap; // attack power
+    double sp; // speed
+    double du; // durability
+    double iq;
+};
+
+struct karakter{
+    int id;
+    string nama;
+    string anime;
+    stat stats;
+    string ket;
+};
+
+struct akun{
+    string user;
+    string pw;
+};
+
+void cls(){
+    #ifdef _WIN32
+        system("cls");
+    #else
+        cout << "\033[2J\033[1;1H";
+#endif
+}
+
+void enterKembali(){
+    cin.ignore();
+    cout << "\n(Ketuk enter untuk kembali)";
+    cin.get();
+}
+
+void tampilkan(string menu, int a, int b){
+    cls();
+    cout << menu;
+    cout << "Pilih (" << a << "-" << b << "): "; 
+}
+
+void tampilkan(string kata){
+    cout << kata << endl;
+}
+
+string cekUser(akun arr[], string tampung, int panjang_user){
+    for (int i = 0; i < panjang_user; i++){
+        if (tampung == arr[i].user){
+            cin.ignore();
+            cout << "(Username sudah ada, ketuk enter untuk kembali)";
+            cin.get();
+            tampung = "0";
+        }
+    }
+    return tampung;
+}
+
+void loginUser(akun arr[], int& sisa_login, bool& token_utama, bool& token_login, int panjang_user, string header){
+    string input_user, input_pw;
+
+    cls();
+    tampilkan(header);
+    cout << "Masukkan username: ";
+    cin >> input_user;
+    cout << "Masukkan password: ";
+    cin >> input_pw;
+    cin.ignore(); 
+
+    for (int i = 0; i < panjang_user; i++){
+        if (input_user == arr[i].user){
+            if (input_pw == arr[i].pw){
+                token_utama = true;
+                token_login = false;
+                cout << "(Login berhasil, ketuk enter untuk lanjut)";
+                cin.get();
+                return;
+            } else {
+                sisa_login--;
+                cout << "(Password salah, sisa login Anda = " << sisa_login << ")";
+                cin.get();
+                break;
+            }
+        }
+
+        if (i == panjang_user - 1){
+            sisa_login--;
+            cout << "(User tidak ditemukan, sisa login Anda = " << sisa_login << ")";
+            cin.get();
+        }
+    }
+
+    if (sisa_login == 0){
+        return;
+    }
+
+    loginUser(arr, sisa_login, token_utama, token_login, panjang_user, header);
+}
+
+void registerUser(akun arr[], string header, int* panjang_user){
+    string tampung;
+    string input_user;
+
+    cls();
+    tampilkan(header);
+    cout << "Masukkan username: ";
+    cin >> tampung;
+    input_user = cekUser(arr, tampung, *panjang_user);
+
+    if (input_user != "0"){
+        arr[*panjang_user].user = input_user;
+        cout << "Masukkan password: ";
+        cin >> arr[*panjang_user].pw;
+        (*panjang_user)++;
+        
+        cin.ignore();
+        cout << "(Berhasil membuat akun, silahkan login kembali)";
+        cin.get();
+    }
+}
+
+void tampilKarakter(karakter arr[], int panjang_karakter){
+    cls();
+    if (panjang_karakter == 0){
+        cin.ignore();
+        cout << "(List kosong, tidak ada data yang bisa dilihat)";
+        cin.get();
+
+    } else {
+        cout << setfill('=') << setw(143) << "=" << endl;
+        cout << setfill(' ');
+
+        cout << "| " << left << setw(4)  << "No" 
+            << "| " << setw(8) << "ID"
+            << "| " << setw(25) << "Nama Karakter"
+            << "| " << setw(18) << "Seri" 
+            << "| " << setw(14)  << "Attack Power" 
+            << "| " << setw(7)  << "Speed" 
+            << "| " << setw(12)  << "Durability" 
+            << "| " << setw(5)  << "IQ"
+            << "| " << setw(32) << "Keterangan" << " |" << endl;
+
+        cout << setfill('-') << setw(143) << "-" << endl;
+        cout << setfill(' '); 
+
+        for (int i = 0; i < panjang_karakter; i++) {
+            cout << "| " << left << setw(4) << (i + 1)
+                << "| " << setw(8) << arr[i].id
+                << "| " << setw(25) << arr[i].nama
+                << "| " << setw(18) << arr[i].anime
+                << "| " << setw(14)  << arr[i].stats.ap 
+                << "| " << setw(7)  << arr[i].stats.sp 
+                << "| " << setw(12)  << arr[i].stats.du 
+                << "| " << setw(5)  << arr[i].stats.iq
+                << "| " << setw(32) << arr[i].ket << " |" << endl;
+        }
+
+        cout << setfill('=') << setw(143) << "=" << endl;
+        cout << setfill(' ');
+    }
+
+    enterKembali();
+}
+
+void tambahKarakter(karakter arr[], int* panjang_karakter){
+    int jumlah_tambah;
+
+    cls();
+    if (*panjang_karakter == max_karakter){
+        cin.ignore();
+        cout << "(List sudah penuh, hapus satu atau lebih karakter)";
+        cin.get();
+
+    } else {
+        cout << "Mau tambah berapa karakter: ";
+        cin >> jumlah_tambah;
+
+        try{
+            if (cin.fail()){
+                cin.clear();
+                throw invalid_argument("(Input harus berupa angka, ketuk enter untuk kembali)");
+            }
+
+            if (cin.peek() != '\n' && !cin.eof()){
+                throw invalid_argument("(Input tidak boleh desimal/huruf, ketuk enter untuk kembali)");
+            }
+
+            if (jumlah_tambah > 0){
+                for (int i = 0; i < jumlah_tambah; i++){
+                    cin.ignore();
+                    cout << "\nKarakter ke-" << i + 1 << endl;
+                    cout << "Nama karakter: ";
+                    getline(cin, arr[*panjang_karakter].nama);
+
+                    cout << "Dari anime/manga: ";
+                    getline(cin, arr[*panjang_karakter].anime);
+                    
+                    cout << "Attack power (0-100): ";
+                    cin >> arr[*panjang_karakter].stats.ap;
+                    cout << "Speed (0-100): ";
+                    cin >> arr[*panjang_karakter].stats.sp;
+                    cout << "Durability (0-100): ";
+                    cin >> arr[*panjang_karakter].stats.du;
+                    cout << "IQ (0-100): ";
+                    cin >> arr[*panjang_karakter].stats.iq;
+                    
+                    cin.ignore();
+                    cout << "Keterangan (isi '-' jika kosong): ";
+                    getline(cin, arr[*panjang_karakter].ket);
+
+                    arr[*panjang_karakter].id = 2500 + *panjang_karakter + 1;
+                    cout << "(Berhasil menambahkan karakter)";
+                    (*panjang_karakter)++;
+                }
+
+                enterKembali();
+
+            } else {
+                cin.ignore();
+                cout << "(Maaf, input tidak valid)";
+                cin.get();
+            }
+        }
+        
+        catch (exception& e){
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cout << e.what();
+            cin.get();
+        }
+    }
+}
+
+void perbaruiKarakter(karakter arr[], int panjang_karakter){
+    int jumlah_update;
+    int elemen;
+
+    cls();
+    if (panjang_karakter == 0){
+        cin.ignore();
+        cout << "(List kosong, tidak ada data yang bisa diperbarui)";
+        cin.get();
+
+    } else {
+        cout << "Mau perbarui berapa karakter: ";
+        cin >> jumlah_update;
+        
+        try{
+            if (cin.fail()){
+                cin.clear();
+                throw invalid_argument("(Input harus berupa angka, ketuk enter untuk kembali)");
+            }
+
+            if (cin.peek() != '\n' && !cin.eof()){
+                throw invalid_argument("(Input tidak boleh desimal/huruf, ketuk enter untuk kembali)");
+            }
+
+            if (jumlah_update > panjang_karakter){
+                cin.ignore();
+                cout << "(Jumlah karakter hanya ada " << panjang_karakter << ")";
+                cin.get();
+
+            } else if (jumlah_update > 0){
+                for (int i = 0; i < jumlah_update; i++){
+                    cin.ignore();
+                    cout << "\nKarakter ke-" << i + 1 << endl;
+                    cout << "Masukkan nomor karakter: ";
+                    cin >> elemen;
+                    
+                    if (elemen > 0 && elemen <= panjang_karakter){
+                        cin.ignore();
+                        cout << "Nama karakter: ";
+                        getline(cin, arr[elemen - 1].nama);
+
+                        cout << "Dari anime/manga: ";
+                        getline(cin, arr[elemen - 1].anime);
+                        
+                        cout << "Attack power (0-100): ";
+                        cin >> arr[elemen - 1].stats.ap;
+                        cout << "Speed (0-100): ";
+                        cin >> arr[elemen - 1].stats.sp;
+                        cout << "Durability (0-100): ";
+                        cin >> arr[elemen - 1].stats.du;
+                        cout << "IQ (0-100): ";
+                        cin >> arr[elemen - 1].stats.iq;
+
+                        cin.ignore();
+                        cout << "Keterangan (isi '-' jika kosong): ";
+                        getline(cin, arr[elemen - 1].ket);
+                        cout << "(Data karakter berhasil diperbarui)";
+                    } else {
+                        cin.ignore();
+                        cout << "(Maaf, nomor karakter tidak valid)";
+                        cin.get();
+                    }
+                }
+
+                enterKembali();
+                
+            } else {
+                cin.ignore();
+                cout << "(Maaf, input tidak valid)";
+                cin.get();
+            }
+        }
+
+        catch (exception& e){
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cout << e.what();
+            cin.get();
+        }
+    }
+}
+
+void hapusKarakter(karakter arr[], int *panjang_karakter){
+    int elemen;
+
+    cls();
+    if (*panjang_karakter == 0){
+        cout << "(List kosong, tidak ada data yang bisa dihapus)";
+        cin.ignore();
+        cin.get();
+
+    } else {
+        cout << "Masukkan nomor karakter: ";
+        cin >> elemen;
+        
+        try{
+            if (cin.fail()){
+                cin.clear();
+                throw invalid_argument("(Input harus berupa angka, ketuk enter untuk kembali)");
+            }
+
+            if (cin.peek() != '\n' && !cin.eof()){
+                throw invalid_argument("(Input tidak boleh desimal/huruf, ketuk enter untuk kembali)");
+            }
+            
+            if (elemen > 0 && elemen <= *panjang_karakter){
+                cout << "(" << arr[elemen - 1].nama << " berhasil dihapus, ketuk enter untuk kembali)";
+                for (int i = elemen - 1; i < *panjang_karakter - 1; i++){
+                    arr[i] = arr[i + 1];
+                }
+                (*panjang_karakter)--;
+            } else {
+                cout << "(Maaf, nomor karakter tidak valid)";
+            }
+            
+            cin.ignore();
+            cin.get();
+        }
+
+        catch (exception& e){
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cout << e.what();
+            cin.get();
+        }
+    }
+}
+
+void swap(karakter* a, karakter* b){
+    karakter temp = *a;
+    *a = *b;
+    *b = temp;
+}
+
+void bubleSort(karakter arr[], string atribut, int panjang){
+    cls();
+
+    if (panjang == 0){
+        cout << "(List kosong, tidak ada data yang bisa disorting)";
+        cin.ignore();
+        cin.get();
+        return;
+    }
+    
+
+    for (int i = 0; i < panjang - 1; i++){
+        for (int j = 0; j < panjang - 1 - i; j++){
+            if (arr[j].nama > arr[j + 1].nama){
+                swap(&arr[j], &arr[j + 1]);
+            }
+        }
+    }
+
+    cin.ignore();
+    cout << "(Sorting by nama karakter berhasil, silahkan lihat pada menu read)";
+    cin.get();
+}
+
+int max(karakter arr[], string atribut, int batas_bawah, int panjang){
+    int index_max = batas_bawah;
+    for (int i = batas_bawah; i < panjang; i++){
+        if (atribut == "AP"){
+            if (arr[i].stats.ap > arr[index_max].stats.ap){
+                index_max = i;
+            }
+        
+        } else if (atribut == "SP"){
+            if (arr[i].stats.sp > arr[index_max].stats.sp){
+                index_max = i;
+            }
+        
+        } else if (atribut == "DU"){
+            if (arr[i].stats.du > arr[index_max].stats.du){
+                index_max = i;
+            }
+        
+        } else if (atribut == "IQ"){
+            if (arr[i].stats.iq > arr[index_max].stats.iq){
+                index_max = i;
+            }
+        
+        }
+    }
+
+    return index_max;
+}
+
+void selectionSort(karakter arr[], string atribut, int panjang){
+    int index_max;
+
+    cls();
+    if (panjang == 0){
+        cout << "(List kosong, tidak ada data yang bisa disorting)";
+        cin.ignore();
+        cin.get();
+        return;
+    }
+    
+    for (int i = 0; i < panjang - 1; i++){
+        index_max = max(arr, atribut, i, panjang);
+        swap(&arr[i], &arr[index_max]);
+    }
+    
+    cin.ignore();
+    cout << "(Sorting by " << atribut << " dari terbesar ke terkecil berhasil, silahkan lihat pada menu read)";
+    cin.get();
+}
+
+void insertionSort(karakter arr[], string atribut, int panjang){
+    cls();
+    if (panjang == 0){
+        cout << "(List kosong, tidak ada data yang bisa disorting)";
+        cin.ignore();
+        cin.get();
+        return;
+    }
+
+    for (int i = 1; i < panjang; i++){
+        karakter key = arr[i];
+        int j = i - 1;
+
+        while (j >= 0 && arr[j].anime > key.anime){
+            arr[j + 1] = arr[j];
+            j--;
+        }
+        arr[j + 1] = key;
+    }
+
+    cin.ignore();
+    cout << "(Sorting by nama seri/anime berhasil, silahkan lihat pada menu read)";
+    cin.get();
+}
+
+void sortCustom(karakter arr[], int panjang){
+    for (int i = 0; i < panjang - 1; i++){
+        for (int j = 0; j < panjang - 1 - i; j++){
+            if (arr[j].id > arr[j + 1].id){
+                swap(&arr[j], &arr[j + 1]);
+            }
+        }
+    }
+}
+
+void linearSearch(karakter* arr, int* panjang){
+    string target;
+
+    cls();
+    cin.get();
+    cout << "Masukkan nama karakter yang ingin dicari: ";
+    getline(cin, target);
+
+    for (int i = 0; i < *panjang; i++){
+        cout << "\n== iterasi ke-" << i + 1 << " ==" << endl;
+
+        if (target == (arr + i)->nama){
+            cout << target  << " = " << (arr + i)->nama << endl;
+            cout << "(" << target << " ditemukan pada indeks ke-" << i << ")";
+            cin.get();
+            return;
+        } else {
+            cout << target  << " != " << (arr + i)->nama << endl;
+            cout << "(tidak ditemukan)" << endl;
+        }
+    }
+    
+    cout <<  "\n(" << target << " tidak ditemukan pada data karakter" << ")";
+    cin.get();
+}
+
+void fibonacciSearch(karakter* arr, int* panjang){
+    int fib = 1;
+    int fib1 = 1;
+    int fib2 = 0;
+    int offset = -1;
+    int index;
+    int target;
+    
+    cls();
+    sortCustom(arr, *panjang);
+    cout << "Masukkan ID karakter yang ingin dicari: ";
+    cin >> target;
+
+    while (fib < *panjang){
+        fib2 = fib1;
+        fib1 = fib;
+        fib = fib1 + fib2;
+    }
+
+    int j = 1;
+    while (fib > 1){
+        cout << "\n== iterasi ke-" << j << " ==" << endl;
+        index = min(offset + fib2, *panjang - 1);
+        if ((arr + index)->id == target){
+            cin.ignore();
+            cout << (arr + index)->id << " = " << target << endl;
+            cout << "("<< target << " ditemukan pada index ke-" << index << ")";
+            cin.get();
+            return;
+        } else if ((arr + index)->id < target){
+            cout << (arr + index)->id << " < " << target << endl;
+            fib = fib1;
+            fib1 = fib2;
+            fib2 = fib - fib1;
+            offset = index;
+        } else {
+            cout << (arr + index)->id << " > " << target << endl;
+            fib = fib2;
+            fib1 = fib1 - fib2;
+            fib2 = fib - fib1;
+        }
+
+        cout << "(tidak ditemukan)" << endl;
+        j++;
+    }
+
+    cin.ignore();
+    cout << "\n(" << target << " tidak ditemukan pada data karakter)"; 
+    cin.get();
+}
+
+int main(){
+    akun admin = {"admin", "123"};
+    akun pengguna[max_akun] = {{"mahdi", "067"}};
+    karakter karakterAnime[max_karakter] = {
+        {2501, "Megumi Hayashida", "Crows", {100, 92, 100, 88}, "Rindaman / Tak Terkalahkan"},
+        {2502, "Bouya Harumichi", "Crows", {99, 94, 98, 85}, "Padiko / Serigala Penyendiri"},
+        {2503, "Guriko Hanaki", "Worst", {98, 98, 95, 87}, "Iblis dari Kyushu"},
+        {2504, "Hana Tsukishima", "Worst", {97, 91, 100, 90}, "Legenda Umehoshi"},
+        {2505, "Tatsuo Kuzugami", "Crows", {99, 90, 97, 84}, "Pria Terkuat Manji Empire"},
+        {2506, "Genji Takiya", "Crows Zero", {95, 92, 97, 82}, "Pemimpin GPS"},
+        {2507, "Tamao Serizawa", "Crows Zero", {96, 90, 96, 88}, "Raja Suzuran (Zero)"},
+        {2508, "Bitou Tatsuya", "Crows", {93, 98, 90, 90}, "Pembunuh Elit Housen"},
+        {2509, "Ryushin Kunou", "Crows", {94, 92, 94, 86}, "Kepala TFOA Gen-4"},
+        {2510, "Tesshou Kawachi", "Worst", {94, 91, 94, 87}, "Kepala TFOA Gen-6"},
+        {2511, "King Joe", "Worst", {94, 88, 96, 88}, "Kanayama Shoji / Bos Housen"},
+        {2512, "Zetton", "Worst", {93, 92, 94, 86}, "Hidetoshi Hanazawa"},
+        {2513, "Mitsumasa Tsukimoto", "Worst", {91, 93, 90, 88}, "Housen Brother / Terkuat"},
+        {2514, "Kousei Takeda", "Crows", {92, 90, 93, 89}, "Kepala TFOA Gen-5"},
+        {2515, "Bulldog", "Crows", {96, 79, 99, 90}, "Yasushi Furukawa"},
+        {2516, "Amachi Hisashi", "Worst", {96, 87, 97, 85}, "Sang Tiran dari Rindow"},
+        {2517, "Takumi Fujishiro", "Worst", {90, 94, 89, 97}, "Otak Jenius TFOA"},
+        {2518, "Masa Shioda", "Worst", {88, 85, 90, 83}, "Anggota Inti TFOA"},
+        {2519, "Hosei Tsukimoto", "Worst", {89, 92, 88, 86}, "Tsukimoto Brother / Petarung"},
+        {2520, "Shoji Rikiya", "Crows Zero", {91, 86, 93, 82}, "Benteng Serizawa Army"},
+
+        {2521, "Manjiro Sano", "Tokyo Revengers", {100, 100, 95, 86}, "Invincible Mikey"},
+        {2522, "Izana Kurokawa", "Tokyo Revengers", {97, 100, 92, 88}, "Pemimpin Tenjiku"},
+        {2523, "Terano South", "Tokyo Revengers", {100, 93, 100, 83}, "Unrivaled / Rokuhara"},
+        {2524, "Ken Ryuguji", "Tokyo Revengers", {97, 91, 99, 91}, "Draken / Wakil Toman"},
+        {2525, "Senju Kawaragi", "Tokyo Revengers", {93, 100, 88, 89}, "Brahman No. 1"},
+        {2526, "Taiju Shiba", "Tokyo Revengers", {98, 87, 98, 85}, "Black Dragon Gen-10"},
+        {2527, "Keisuke Baji", "Tokyo Revengers", {94, 93, 95, 86}, "Kapten Divisi 1 Pertama"},
+        {2528, "Wakasa Imaushi", "Tokyo Revengers", {91, 100, 87, 91}, "The White Leopard"},
+        {2529, "Keizo Arashi", "Tokyo Revengers", {97, 85, 99, 86}, "Benkei / Black Dragon"},
+        {2530, "Kakucho", "Tokyo Revengers", {96, 97, 95, 87}, "Hitto Kakucho / Tenjiku"},
+        {2531, "Yasuhiro Muto", "Tokyo Revengers", {95, 85, 96, 86}, "Mucho / Kapten Divisi 5"},
+        {2532, "Shuji Hanma", "Tokyo Revengers", {94, 93, 100, 89}, "The Zombie / Reaper"},
+        {2533, "Takemichi Hanagaki", "Tokyo Revengers", {75, 75, 100, 94}, "Hero / Daya Tahan Mutlak"},
+        {2534, "Chifuyu Matsuno", "Tokyo Revengers", {89, 91, 90, 92}, "Wakil Divisi 1 Setia"},
+        {2535, "Mitsuya Takashi", "Tokyo Revengers", {91, 92, 92, 95}, "Kapten Divisi 2 / Kreatif"},
+        {2536, "Souya Kawata", "Tokyo Revengers", {97, 96, 91, 83}, "Angry / Blue Ogre Mode"},
+        {2537, "Kazutora Hanemiya", "Tokyo Revengers", {91, 93, 90, 84}, "Pendiri Toman / Valhalla"},
+        {2538, "Ran Haitani", "Tokyo Revengers", {89, 92, 88, 90}, "Haitani Brother (Kakak)"},
+        {2539, "Rindo Haitani", "Tokyo Revengers", {88, 93, 87, 89}, "Haitani Brother (Adik)"},
+        {2540, "Kokonoi Hajime", "Tokyo Revengers", {83, 89, 85, 99}, "Koko / Jenius Finansial"},
+
+        {2541, "Kohaku", "High & Low", {99, 94, 98, 92}, "Mugen Leader / Legenda"},
+        {2542, "Amamiya Masaki", "High & Low", {99, 96, 97, 89}, "Amamiya Brother / Karate"},
+        {2543, "Amamiya Hiroto", "High & Low", {98, 98, 95, 90}, "Amamiya Brother / Boxing"},
+        {2544, "Cobra", "High & Low", {96, 95, 97, 91}, "Sannoh Rengokai Leader"},
+        {2545, "Murayama Yoshiki", "High & Low", {93, 95, 100, 88}, "Oya High Full-Time Boss"},
+        {2546, "Smoky", "High & Low", {91, 100, 86, 95}, "Rude Boys Leader"},
+        {2547, "Hyuga Norihisa", "High & Low", {95, 92, 98, 85}, "Daruma Ikka Leader"},
+        {2548, "Rocky", "High & Low", {93, 90, 96, 93}, "White Rascals Leader"},
+        {2549, "Ice", "High & Low", {97, 95, 95, 89}, "Mighty Warriors Leader"},
+        {2550, "Jesse", "High & Low", {94, 100, 91, 92}, "Prison Gang / Funky Boy"},
+        {2551, "Lao", "High & Low", {100, 89, 100, 87}, "Raoh / Suzuran's Strongest"},
+        {2552, "Fujio Hanaoka", "High & Low", {90, 93, 96, 88}, "Oya High Part-Time Leader"},
+        {2553, "Sachio Ueda", "High & Low", {95, 96, 94, 93}, "Housen Academy Leader"},
+        {2554, "Todoroki Yosuke", "High & Low", {92, 94, 93, 97}, "Oya High Strategic Ace"},
+        {2555, "Amagai Kohei", "High & Low", {93, 92, 93, 91}, "Senomon High / Blood Gate"},
+        {2556, "Yukinojo Odajima", "High & Low", {90, 95, 89, 94}, "Housen Shitenno / Analis"},
+        {2557, "Mercy", "High & Low", {95, 86, 97, 85}, "Tangan Kanan Rocky"},
+        {2558, "Phoenix", "High & Low", {93, 97, 92, 90}, "Sawayama / Housen Shitenno"},
+        {2559, "Tsukasa Takajo", "High & Low", {90, 91, 91, 90}, "Oya High / Partner Fujio"},
+        {2560, "Jamuo", "High & Low", {70, 75, 78, 95}, "Informan Setia Oya High"},
+
+        {2561, "Ricardo Martinez", "Hajime no Ippo", {100, 100, 100, 100}, "Dewa Tinju / Juara Dunia"},
+        {2562, "Mamoru Takamura", "Hajime no Ippo", {100, 98, 100, 95}, "6-Class Conqueror"},
+        {2563, "Makunouchi Ippo", "Hajime no Ippo", {99, 89, 100, 87}, "Wind God / Retired"},
+        {2564, "Ichiro Miyata", "Hajime no Ippo", {91, 100, 85, 96}, "Thunderbolt / Counter King"},
+        {2565, "Alexander Volg Zangief", "Hajime no Ippo", {97, 97, 95, 98}, "Juara Dunia IBF"},
+        {2566, "Takeshi Sendo", "Hajime no Ippo", {99, 90, 98, 87}, "Naniwa Tiger / Smasher"},
+        {2567, "Ryo Mashiba", "Hajime no Ippo", {96, 95, 92, 94}, "Grim Reaper / Flicker"},
+        {2568, "Sawamura Ryuhei", "Hajime no Ippo", {97, 96, 91, 95}, "Jenius Counter / Owari"},
+        {2569, "David Eagle", "Hajime no Ippo", {96, 95, 97, 98}, "The Golden Eagle"},
+        {2570, "Bryan Hawk", "Hajime no Ippo", {100, 98, 94, 83}, "Wilderness Genius"},
+        {2571, "Eiji Date", "Hajime no Ippo", {95, 94, 93, 96}, "Heart Break Shot / Legend"},
+        {2572, "Alfredo Gonzales", "Hajime no Ippo", {96, 96, 92, 94}, "Grim Reaper / Metzli"},
+        {2573, "Wally", "Hajime no Ippo", {89, 100, 86, 96}, "The Nature's Child"},
+        {2574, "Itagaki Manabu", "Hajime no Ippo", {85, 100, 83, 93}, "Chronos / Speed Star"},
+        {2575, "Randy Boy Jr", "Hajime no Ippo", {95, 93, 94, 91}, "Asura / Switch Hitter"},
+        {2576, "Sanada Kazuki", "Hajime no Ippo", {89, 91, 88, 99}, "Medal Tinju / Dokter"},
+        {2577, "Shimabukuro Iwao", "Hajime no Ippo", {94, 81, 97, 85}, "Penyelam Karang / Tank"},
+        {2578, "Jason Ozuma", "Hajime no Ippo", {93, 89, 91, 83}, "Hook Spesialis / Tulus"},
+        {2579, "Saeki Akira", "Hajime no Ippo", {84, 99, 82, 92}, "Speed Star Orisinil"},
+        {2580, "Aoki Masaru", "Hajime no Ippo", {82, 80, 90, 91}, "Raja Trik / Frog Punch"},
+
+        {2581, "Hajime Umesamiya", "Wind Breaker", {98, 95, 98, 96}, "Pemimpin Bofurin"},
+        {2582, "Chika Takiishi", "Wind Breaker", {100, 99, 96, 89}, "The Noroshi Calamity"},
+        {2583, "Endo", "Wind Breaker", {96, 98, 93, 94}, "Tangan Kanan Takiishi"},
+        {2584, "Haruka Sakura", "Wind Breaker", {93, 97, 91, 89}, "Pemimpin Kelas Tahun 1"},
+        {2585, "Hayato Suo", "Wind Breaker", {90, 99, 89, 98}, "Ahli Beladiri Kungfu"},
+        {2586, "Kyotaro Sugishita", "Wind Breaker", {96, 91, 97, 85}, "Anjing Gila / Umesamiya"},
+        {2587, "Jo Togame", "Wind Breaker", {96, 93, 96, 91}, "Mantan Shishitoren No. 2"},
+        {2588, "Choji Tomiyama", "Wind Breaker", {94, 100, 89, 87}, "Pemimpin Shishitoren"},
+        {2589, "Toma Hiragi", "Wind Breaker", {94, 92, 95, 94}, "Bofurin Shitenno / Katana"},
+        {2590, "Tasuku Tsubakino", "Wind Breaker", {91, 98, 89, 93}, "Bofurin Shitenno / Dancer"},
+        {2591, "Ren Kaji", "Wind Breaker", {92, 93, 91, 90}, "Pemimpin Tahun 2 / Headphone"},
+        {2592, "Mitsuki Kiryu", "Wind Breaker", {89, 94, 89, 95}, "Ahli Game & Jarak Jauh"},
+        {2593, "Kotaro Sako", "Wind Breaker", {91, 92, 92, 89}, "Furin Thn 1 / Petarung Stik"},
+        {2594, "Hyoma Chigiri", "Wind Breaker", {88, 95, 87, 92}, "Furin Thn 1 / Kecepatan"},
+        {2595, "Taiga Tsugeura", "Wind Breaker", {95, 80, 96, 82}, "Furin Thn 1 / Otot Besar"},
+        {2596, "Akihiko Nirei", "Wind Breaker", {60, 70, 65, 99}, "Database & Analis Data"},
+        {2597, "Arima", "Wind Breaker", {89, 90, 89, 88}, "Anggota Inti Geng KEEL"},
+        {2598, "Kanuma", "Wind Breaker", {90, 91, 90, 87}, "Anggota Inti Geng KEEL"},
+        {2599, "Anzai", "Wind Breaker", {85, 86, 84, 85}, "Anggota Pendukung Furin"},
+        {2600, "Nagame", "Wind Breaker", {86, 88, 85, 87}, "Anggota Pendukung Furin"}
+    };
+
+    string menu_login = R"(=====================================
+|           LOGIN DULU YAA          |
+=====================================
+| 1) Login User Biasa               |
+| 2) Login Admin                    |
+| 3) Register                       |
+| 0) Keluar                         |
+=====================================
+)";
+
+    string menu_utama = R"(=================================
+|        MAU NGAPAIN CUY?       |
+=================================
+| 1) Read                       |
+| 2) Create                     |
+| 3) Update                     |
+| 4) Delete                     |
+| 5) Sorting                    |
+| 6) Searching                  |
+| 0) Keluar                     |
+=================================
+)";
+
+    string menu_sorting = R"(=================================
+|          MENU SORTING         |
+=================================
+| 1) By Nama Karakter           |
+| 2) By Nama Seri/Anime         |
+| 3) By Attack Power            |
+| 4) By Speed                   |
+| 5) By Durability              |
+| 6) By IQ                      |
+| 0) Kembali                    |
+=================================
+)";
+
+    string menu_searching = R"(=================================
+|         MENU SEARCHING        |
+=================================
+| 1) By Nama Karakter           |
+| 2) By ID karakter             |
+| 0) Kembali                    |
+=================================
+)";
+
+    string header_loginUser = R"(============================
+|     LOGIN USER BIASA     |
+============================)";
+
+    string header_register = R"(============================
+|         Register         |
+============================)";
+
+    string akhir_program = R"(===================================================
+ ____   _   _   _____   _____   _   _   _____   _ 
+ / ___| | | | || ____||_   _|| | | || ____|| |     
+ \\___ \\ | | | ||  _|    | |  | |_| ||  _|  | |   
+  ___) || |_| || |___   | |  |  _  || |___ |_|     
+ |____/  \\___/ |_____|  |_|  |_| |_||_____|(_)    
+                                                   
+            PROGRAM BERHASIL DISELESAIKAN          
+===================================================)";
+
+    int panjang_karakter = 100;
+    int panjang_user = 1;
+    int sisa_login = 3;
+    int pilihan_1, pilihan_2, pilihan_3, pilihan_4;
+    bool token_login = true;
+    bool token_utama = false;
+    bool token_sorting = false;
+    bool token_searching = false;
+    
+    while (token_login && sisa_login > 0){
+        tampilkan(menu_login, 0, 3);
+        cin >> pilihan_1;
+
+        try{
+            if (cin.fail()){
+                cin.clear();
+                throw invalid_argument("(Input harus berupa angka, ketuk enter untuk kembali)");
+            }
+
+            if (cin.peek() != '\n' && !cin.eof()){
+                throw invalid_argument("(Input tidak boleh desimal/huruf, ketuk enter untuk kembali)");
+            }
+
+            switch (pilihan_1){
+                case 0:
+                    token_login = false;
+                    break;
+                
+                case 1:
+                    loginUser(pengguna, sisa_login, token_utama, token_login, panjang_user, header_loginUser);
+                    break;
+                
+                case 2:
+                    cls();
+                    cin.ignore();
+                    cout << "(Maaf, fitur ini akan tersedia secepatnya)";
+                    cin.get();
+                    break;
+                
+                case 3:
+                    registerUser(pengguna, header_register, &panjang_user);
+                    break;
+            
+            default:
+                throw runtime_error("(Input tidak valid, ketuk enter untuk kembali)");
+            }   
+        } 
+        
+        catch (exception& e){
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cout << e.what();
+            cin.get();
+        }
+    }
+    
+    while (token_utama){
+        tampilkan(menu_utama, 0, 6);
+        cin >> pilihan_2;
+
+        try{
+            if (cin.fail()){
+                cin.clear();
+                throw invalid_argument("(Input harus berupa angka, ketuk enter untuk kembali)");
+            }
+
+            if (cin.peek() != '\n' && !cin.eof()){
+                throw invalid_argument("(Input tidak boleh desimal/huruf, ketuk enter untuk kembali)");
+            }
+
+            switch (pilihan_2){
+                case 0:
+                    token_utama = false;
+                    break;
+    
+                case 1:
+                    tampilKarakter(karakterAnime, panjang_karakter);
+                    break;
+    
+                case 2: 
+                    tambahKarakter(karakterAnime, &panjang_karakter);
+                    break;
+    
+                case 3:
+                    perbaruiKarakter(karakterAnime, panjang_karakter);
+                    break;
+    
+                case 4:
+                    hapusKarakter(karakterAnime, &panjang_karakter);
+                    break;
+    
+                case 5:
+                    token_sorting = true;
+                    while (token_sorting){
+                        tampilkan(menu_sorting, 0, 6);
+                        cin >> pilihan_3;
+                        
+                        try{
+                            if (cin.fail()){
+                                cin.clear();
+                                throw invalid_argument("(Input harus berupa angka, ketuk enter untuk kembali)");
+                            }
+
+                            if (cin.peek() != '\n' && !cin.eof()) {
+                                throw invalid_argument("(Input tidak boleh desimal/huruf, ketuk enter untuk kembali)");
+                            }
+
+                            switch (pilihan_3){
+                                case 0:
+                                    token_sorting = false;
+                                    break;
+                                case 1:
+                                    bubleSort(karakterAnime, "nama", panjang_karakter);
+                                    token_sorting = false;
+                                    break;
+                                case 2:
+                                    insertionSort(karakterAnime, "anime", panjang_karakter);
+                                    token_sorting = false;
+                                    break;
+                                case 3:
+                                    selectionSort(karakterAnime, "AP", panjang_karakter);
+                                    token_sorting = false;
+                                    break;
+                                case 4:
+                                    selectionSort(karakterAnime, "SP", panjang_karakter);
+                                    token_sorting = false;
+                                    break;
+                                case 5:
+                                    selectionSort(karakterAnime, "DU", panjang_karakter);
+                                    token_sorting = false;
+                                    break;
+                                case 6:
+                                    selectionSort(karakterAnime, "IQ", panjang_karakter);
+                                    token_sorting = false;
+                                    break;
+                                default:
+                                    throw runtime_error("(Input tidak valid, ketuk enter untuk kembali)");
+                            }   
+                        }
+
+                        catch (exception& e){
+                            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                            cout << e.what();
+                            cin.get();
+                        }
+                    }
+                    break;
+    
+                case 6:
+                    token_searching = true;
+                    while (token_searching){
+                        tampilkan(menu_searching, 0, 2);
+                        cin >> pilihan_4;
+                        
+                        try{
+                            if (cin.fail()){
+                                cin.clear();
+                                throw invalid_argument("(Input harus berupa angka, ketuk enter untuk kembali)");
+                            }
+
+                            if (cin.peek() != '\n' && !cin.eof()) {
+                                throw invalid_argument("(Input tidak boleh desimal/huruf, ketuk enter untuk kembali)");
+                            }
+
+                            switch (pilihan_4){
+                                case 0:
+                                    token_searching = false;
+                                    break;
+                                case 1:
+                                    linearSearch(karakterAnime, &panjang_karakter);
+                                    token_searching = false;
+                                    break;
+                                case 2:
+                                    fibonacciSearch(karakterAnime, &panjang_karakter);
+                                    token_searching = false;
+                                    break;
+                                default:
+                                    throw runtime_error("(Input tidak valid, ketuk enter untuk kembali)");
+                            } 
+                        }
+
+                        catch (exception& e){
+                            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                            cout << e.what();
+                            cin.get();
+                        }
+                    }
+                    break;
+    
+                default:
+                    throw runtime_error("(Input tidak valid, ketuk enter untuk kembali)");
+            }
+        }
+
+        catch (exception& e){
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cout << e.what();
+            cin.get();
+        }
+    }
+
+    cls();
+    tampilkan(akhir_program);
+    return 0;
+}
