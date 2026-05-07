@@ -50,9 +50,12 @@ void iklan(string array[], int jumlahIklan){
     cls();
     int seconds = 5;
     int index = rand() % jumlahIklan;
-    cout << array[index];
-    while (seconds > 0) {
+    
+    while (true) {
+        cls();
+        cout << array[index];
         cout << "lewati dalam: " << seconds << " detik" << endl;
+        if (seconds == 0) break;
         this_thread::sleep_for(chrono::seconds(1));
         seconds--;
     }
