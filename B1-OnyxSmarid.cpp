@@ -51,13 +51,18 @@ void iklan(string array[], int jumlahIklan){
     int seconds = 5;
     int index = rand() % jumlahIklan;
     cout << array[index];
-    while (seconds > 0) {
-        cout << "lewati dalam: " << seconds << " detik" << endl;
-        this_thread::sleep_for(chrono::seconds(1));
-        seconds--;
-    }
+    // while (seconds > 0) {
+    //     cout << "lewati dalam: " << seconds << " detik" << endl;
+    //     this_thread::sleep_for(chrono::seconds(1));
+    //     seconds--;
+    // }
 
-    cout << "\n(Ketuk enter untuk kembali)";
+    for (int i = 0; i <= 100; i++) {
+        std::cout << "\rProgress: " << i << "%" << std::flush;
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
+    
+    cout << endl << "\n(Ketuk enter untuk lanjut)";
     cin.get();
 }
 
@@ -897,8 +902,7 @@ int main(){
 |           LOGIN DULU YAA          |
 =====================================
 | 1) Login User Biasa               |
-| 2) Login Admin                    |
-| 3) Register                       |
+| 2) Register                       |
 | 0) Keluar                         |
 =====================================
 )";
@@ -1005,14 +1009,14 @@ int main(){
                     index_pengguna = loginUser(pengguna, sisa_login, token_utama, token_login, panjang_user, header_loginUser);
                     break;
                 
-                case 2:
-                    cls();
-                    cin.ignore();
-                    cout << "(Maaf, fitur ini akan tersedia secepatnya)";
-                    cin.get();
-                    break;
+                // case 2:
+                //     cls();
+                //     cin.ignore();
+                //     cout << "(Maaf, fitur ini akan tersedia secepatnya)";
+                //     cin.get();
+                //     break;
                 
-                case 3:
+                case 2:
                     registerUser(pengguna, header_register, &panjang_user);
                     break;
             
@@ -1045,7 +1049,7 @@ int main(){
                 cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
                 if (pilihan_2 != 0){
-                iklan(arrayIklan, 5);
+                    iklan(arrayIklan, 5);
                 }
 
                 switch (pilihan_2){
@@ -1062,17 +1066,18 @@ int main(){
                         while (token_sorting){
                             tampilkan(menu_sorting, 0, 6);
                             cin >> pilihan_3;
-                            iklan(arrayIklan, 5);
+                            
                             try{
                                 if (cin.fail()){
                                     cin.clear();
                                     throw invalid_argument("(Input harus berupa angka, ketuk enter untuk kembali)");
                                 }
-    
+                                
                                 if (cin.peek() != '\n' && !cin.eof()) {
                                     throw invalid_argument("(Input tidak boleh desimal/huruf, ketuk enter untuk kembali)");
                                 };
                                 
+                                iklan(arrayIklan, 5);
                                 switch (pilihan_3){
                                     case 0:
                                         token_sorting = false;
@@ -1119,17 +1124,18 @@ int main(){
                         while (token_searching){
                             tampilkan(menu_searching, 0, 2);
                             cin >> pilihan_4;
-                            iklan(arrayIklan, 5);
+                            
                             try{
                                 if (cin.fail()){
                                     cin.clear();
                                     throw invalid_argument("(Input harus berupa angka, ketuk enter untuk kembali)");
                                 }
-    
+                                
                                 if (cin.peek() != '\n' && !cin.eof()) {
                                     throw invalid_argument("(Input tidak boleh desimal/huruf, ketuk enter untuk kembali)");
                                 }
-    
+                                
+                                iklan(arrayIklan, 5);
                                 switch (pilihan_4){
                                     case 0:
                                         token_searching = false;
@@ -1157,7 +1163,6 @@ int main(){
         
                 case 4:
                     battleKarakter(karakterAnime, panjang_karakter);
-                    // cout << "Ini battleKarakter" << endl;
                     break;
 
                 default:
@@ -1198,17 +1203,14 @@ int main(){
                     
                     case 2:
                         tambahKarakter(karakterAnime, &panjang_karakter);
-                        // cout << "Ini tambahKarakter" << endl;
                         break;
                         
                     case 3:
                         perbaruiKarakter(karakterAnime, panjang_karakter);
-                        // cout << "Ini perbaruiKarakter" << endl;
                         break;
                         
                     case 4:
                         hapusKarakter(karakterAnime, &panjang_karakter);
-                        // cout << "Ini hapusKarakter" << endl;
                         break;
                         
                     case 5:
