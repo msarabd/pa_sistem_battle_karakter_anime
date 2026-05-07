@@ -607,6 +607,9 @@ void fibonacciSearch(karakter* arr, int* panjang){
     }
 }
 
+// void riwayatBattle
+// void hapusRiwayat
+
 double hitungSkor(stat &s){
     return (s.ap * 0.30) + 
            (s.sp * 0.20) + 
@@ -712,8 +715,8 @@ void battleKarakter(karakter karakterAnime[], int& jumlah_karakter){
 }
 
 int main(){
-    // akun admin = {"admin", "123"};
     akun pengguna[max_akun] = {{"mahdi", "067", "biasa"}, {"andi", "123", "premium"}};
+    // var stack nya
     karakter karakterAnime[max_karakter] = {
         {2501, "Megumi Hayashida", "Crows", {100, 92, 100, 88}, "Rindaman / Tak Terkalahkan"},
         {2502, "Bouya Harumichi", "Crows", {99, 94, 98, 85}, "Padiko / Serigala Penyendiri"},
@@ -1016,6 +1019,7 @@ int main(){
             PROGRAM BERHASIL DISELESAIKAN          
 ===================================================)";
     
+    string arrayIklan[5] = {iklanA, iklanB, iklanC, iklanD, iklanE};
     int index_pengguna;
     int panjang_karakter = 100;
     int panjang_user = 2;
@@ -1026,7 +1030,6 @@ int main(){
     bool token_sorting = false;
     bool token_searching = false;
     srand(time(0));
-    string arrayIklan[5] = {iklanA, iklanB, iklanC, iklanD, iklanE};
 
     while (token_login && sisa_login > 0){
         tampilkan(menu_login, 0, 3);
@@ -1053,13 +1056,6 @@ int main(){
                 case 1:
                     index_pengguna = loginUser(pengguna, sisa_login, token_utama, token_login, panjang_user, header_loginUser);
                     break;
-                
-                // case 2:
-                //     cls();
-                //     cin.ignore();
-                //     cout << "(Maaf, fitur ini akan tersedia secepatnya)";
-                //     cin.get();
-                //     break;
                 
                 case 2:
                     registerUser(pengguna, header_register, &panjang_user);
@@ -1094,10 +1090,6 @@ int main(){
                 }
                 
                 cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                // if (pilihan_2 != 0){
-                //     iklan(arrayIklan, 5);
-                // }
-
                 switch (pilihan_2){
                     case 0:
                         iklan(arrayIklan, 5);
