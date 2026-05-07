@@ -46,6 +46,21 @@ void enterKembali(){
     cin.get();
 }
 
+void iklan(string array[], int jumlahIklan){
+    cls();
+    int seconds = 5;
+    int index = rand() % jumlahIklan;
+    cout << array[index];
+    while (seconds > 0) {
+        cout << "lewati dalam: " << seconds << " detik" << endl;
+        this_thread::sleep_for(chrono::seconds(1));
+        seconds--;
+    }
+
+    cout << "\n(Ketuk enter untuk kembali)";
+    cin.get();
+}
+
 void tampilkan(string menu, int a, int b){
     cls();
     cout << menu;
@@ -759,6 +774,125 @@ int main(){
         {2600, "Nagame", "Wind Breaker", {86, 88, 85, 87}, "Anggota Pendukung Furin"}
     };
 
+        string iklanA = R"(==========================================================================
+
+
+   /\
+  /  \
+  \  /                                                      _________
+ ./  \.      NASI CUMI HITAM MADURA PAK KRIS              /           \
+  \__/  Specialis Nasi Cumi Hitam BERTELOR Asli Madura   |   ~ ~ ~ ~   |
+  /||\     instagram @cumipakkris||@nasicumi             |   ~ ~ ~ ~   |
+ / || \                                                   \___________/
+   ||
+   ||
+
+
+==========================================================================
+)";
+
+    string iklanB = R"(!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+       .........
+    ...         ...
+   .               .
+  .                 .
+ .        ...        .
+.        .   .        .     Kipas angin TURBO JET 2000
+.       .     .       .         dengan kemampuan dingin maksimal
+.        .   .        .             sensasi ditiup angin mesin jet
+ .        ...        .                  mendinginkan ruangan besar dan luas
+  .                 .
+   .               .
+    ...         ...
+       .........
+           .
+           .
+           .                SEGERA BELI SEBELUM KEHABISAN
+           .                    HANYA DI BAGO GO SHOP
+           .
+          . .
+         .   .
+         .   .
+        .     .
+       .........
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+)";
+
+    string iklanC = R"(
+
+                 _______________________________
+             .-''                               ''-.
+          .-'                                       '-.
+        .'                                             '.
+       /                                                 \
+      /                                                   \
+     |     ___________________________________________     |
+     |    /                                           \    |
+     |   /                                             \   |
+     |  |        ===============================        |  |    =============================================
+     |  |        |                             |        |  |     | PARTAI FINAL UEFA CHAMPIONS LEAGUE 2026 |
+     |  |        |          PUSKAS             |        |  |     |   BAYERN MUNCHEN VS ATLETICO MADRID     |
+     |  |        |          ARENA              |        |  |     |              30 MEI 2026                |
+     |  |        |                             |        |  |     |    PUSKAS ARENA BUDAPHEST HUNGARIA      |
+     |  |        ===============================        |  |
+     |   \                                             /   |
+     |    \___________________________________________/    |
+      \                                                   /
+       \                                                 /
+        '.                                             .'
+          '-.                                       .-'
+             ''-._______________________________.-'' 
+
+)";
+    string iklanD = R"(
++-------------------------------------------+
+|         +=======================+         |   SEGERA HADIR
+|         |    METEORS BLASTER    |         |   Brand new Plane Shooter Game
+|         +=======================+         |
+|                                           |
+|                   XXX                     |
+|                  X   X            XXX     |   - Tampilan yang catchy
+|                   XXX            X   X    |   - Gameplay yang unik
+|      XXX                          XXX     |   - Temukan berbagai perlengkapan unik
+|     X   X                                 |   - Berbagai Upgrade dan Kreasi pesawat
+|      XXX                                  |   - dan Masih banyak lagi
+|                :    _    :                |
+|                +   | |   +                |
+|              /==#########==\              |
+|             |_______________|             |   Jangan lupa tambahkan ke wishlist kalian
+|                    | |                    |   :)
+|                    /|\                    |
+|                   /_|_\                   |
+|                                           |
+|/=========================================\|
+||              Coming Soon                ||
++\=========================================/+
+)";
+    string iklanE = R"(
+..........................................................
+.                                                        .
+.                                                        .  Bosan
+.           ________________________________             .  Butuh hiburan
+.          |                                |            .  Nyari yang asik
+.          | xx      x         x       x    |            .  
+.          |   xx  xx           xx   xx     |            .  Dengerin lagu-lagu Marshmello
+.          |     xx               xxx       |            .  diberbagai kanal mendengar musik
+.          |   xx  xx            xx xx      |            .  Hiburan yang asik
+.          | xx      x         xx     x     |            .  Mendampingi kesibukan kalian
+.          |                                |            .  Menghilangkan kebosanan kalian
+.          |                                |            .  
+.          |                                |            .  Karena itu jangan lupa dengerin
+.          |     \                  /       |            .  "Marshmello" dengan berbagai musiknya 
+.          |      \                /        |            .  yang asik dan menyenangkan
+.          |       \______________/         |            .
+.          |                                |            .    x   x    X   X     X   X
+.          |________________________________|            .    \___/    \___/     \___/
+.                                                        .
+.                                                        .
+..........................................................
+)";
+
     string menu_login = R"(=====================================
 |           LOGIN DULU YAA          |
 =====================================
@@ -845,7 +979,9 @@ int main(){
     bool token_utama = false;
     bool token_sorting = false;
     bool token_searching = false;
-    
+    srand(time(0));
+    string arrayIklan[5] = {iklanA, iklanB, iklanC, iklanD, iklanE};
+
     while (token_login && sisa_login > 0){
         tampilkan(menu_login, 0, 3);
         cin >> pilihan_1;
@@ -906,7 +1042,12 @@ int main(){
                 if (cin.peek() != '\n' && !cin.eof()){
                     throw invalid_argument("(Input tidak boleh desimal/huruf, ketuk enter untuk kembali)");
                 }
-    
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+                if (pilihan_2 != 0){
+                iklan(arrayIklan, 5);
+                }
+
                 switch (pilihan_2){
                     case 0:
                         token_utama = false;
@@ -921,7 +1062,7 @@ int main(){
                         while (token_sorting){
                             tampilkan(menu_sorting, 0, 6);
                             cin >> pilihan_3;
-                            
+                            iklan(arrayIklan, 5);
                             try{
                                 if (cin.fail()){
                                     cin.clear();
@@ -930,8 +1071,8 @@ int main(){
     
                                 if (cin.peek() != '\n' && !cin.eof()) {
                                     throw invalid_argument("(Input tidak boleh desimal/huruf, ketuk enter untuk kembali)");
-                                }
-    
+                                };
+                                
                                 switch (pilihan_3){
                                     case 0:
                                         token_sorting = false;
@@ -978,7 +1119,7 @@ int main(){
                         while (token_searching){
                             tampilkan(menu_searching, 0, 2);
                             cin >> pilihan_4;
-                            
+                            iklan(arrayIklan, 5);
                             try{
                                 if (cin.fail()){
                                     cin.clear();
