@@ -32,6 +32,14 @@ struct akun{
     string status;
 };
 
+struct stack{
+    string battle[100];
+    string pemenang[100];
+    double ovr[100];
+    int top;
+};
+
+
 void cls(){
     #ifdef _WIN32
         system("cls");
@@ -607,8 +615,145 @@ void fibonacciSearch(karakter* arr, int* panjang){
     }
 }
 
-// void riwayatBattle
-// void hapusRiwayat
+void push(stack* s, string battle, string pemenang){
+    if (s->top == 99){
+        cout << "(Stack penuh)";
+        return;
+    }
+
+    s->top++;
+    s->battle[s->top] = battle;
+    s->battle[s->top] = pemenang;
+}
+
+void pop(stack* riwayatBattle, stack* hapusRiwayat){
+    cls();
+
+    if (riwayatBattle->top == -1){
+        cout << "(Riwayat kosong)";
+        enterKembali();
+        return;
+    }
+
+    hapusRiwayat->top++;
+
+    hapusRiwayat->battle[hapusRiwayat->top] =
+    riwayatBattle->battle[riwayatBattle->top];
+
+    hapusRiwayat->pemenang[hapusRiwayat->top] =
+    riwayatBattle->pemenang[riwayatBattle->top];
+
+    // TABEL BATTLE
+    cout << setfill('=') << setw(45) << "=" << endl;
+    cout << setfill(' ');
+
+    cout << "| " << left << setw(4) << "No"
+        << "| " << setw(35) << "Battle"
+        << "|" << endl;
+
+    cout << setfill('-') << setw(45) << "-" << endl;
+    cout << setfill(' ');
+
+    cout << "| " << left << setw(4) << 1
+        << "| " << setw(35)
+        << riwayatBattle->battle[riwayatBattle->top]
+        << "|" << endl;
+
+    cout << setfill('=') << setw(45) << "=" << endl;
+
+    cout << endl;
+
+    // TABEL PEMENANG
+    cout << setfill('=') << setw(45) << "=" << endl;
+    cout << setfill(' ');
+
+    cout << "| " << left << setw(4) << "No"
+        << "| " << setw(25) << "Pemenang"
+        << "|" << endl;
+
+    cout << setfill('-') << setw(45) << "-" << endl;
+    cout << setfill(' ');
+
+    cout << "| " << left << setw(4) << 1
+        << "| " << setw(25)
+        << riwayatBattle->pemenang[riwayatBattle->top]
+        << "|" << endl;
+
+    cout << setfill('=') << setw(45) << "=" << endl;
+
+    riwayatBattle->top--;
+
+    enterKembali();
+}
+
+void tampilRiwayat(stack riwayatBattle){
+    cls();
+
+    if (riwayatBattle.top == -1){
+        cout << "(Belum ada riwayat)";
+        enterKembali();
+        return;
+    }
+    cout << "========== RIWAYAT BATTLE ==========\n\n";
+
+    cout << setfill('=') << setw(71) << "=" << endl;
+    cout << setfill(' ');
+
+    cout << "| " << left << setw(4) << "No"
+        << "| " << left << setw(60) << "Battle"
+        << "|" << endl;
+
+    cout << setfill('-') << setw(71) << "-" << endl;
+    cout << setfill(' ');
+
+    int nomor = 1;
+
+    for (int i = riwayatBattle.top; i >= 0; i--){
+
+        cout << "| " << left << setw(4)
+            << nomor++
+
+            << "| " << left << setw(60)
+            << riwayatBattle.battle[i]
+
+            << "|" << endl;
+    }
+
+    cout << setfill('=') << setw(71) << "=" << endl;
+
+    cout << endl << endl;
+    
+    cout << setfill('=') << setw(58) << "=" << endl;
+    cout << setfill(' ');
+
+    cout << "| " << left << setw(4) << "No"
+        << "| " << left << setw(30) << "Pemenang"
+        << "| " << left << setw(15) << "OVR"
+        << "|" << endl;
+
+    cout << setfill('-') << setw(58) << "-" << endl;
+    cout << setfill(' ');
+
+    nomor = 1;
+
+    for (int i = riwayatBattle.top; i >= 0; i--){
+
+        cout << "| " << left << setw(4)
+            << nomor++
+
+            << "| " << left << setw(30)
+            << riwayatBattle.pemenang[i]
+            << "| " << left << setw(15)
+            << riwayatBattle.ovr[i]
+
+            << "|" << endl;
+    }
+
+    cout << setfill('=') << setw(58) << "=" << endl;
+    cout << setfill(' ');
+
+    enterKembali();
+}
 
 double hitungSkor(stat &s){
     return (s.ap * 0.30) + 
@@ -627,7 +772,7 @@ void efekLoading(string teks){
     cout << endl;
 }
 
-void duel(karakter& a, karakter& b){
+void duel(karakter& a, karakter& b, stack* riwayatBattle){
     srand(time(0));
     double skorA = hitungSkor(a.stats);
     double skorB = hitungSkor(b.stats);
@@ -648,26 +793,60 @@ void duel(karakter& a, karakter& b){
 
     cout << "\n  Statistik Duel  \n";
     cout << a.nama << " [AP:" << a.stats.ap << " SP:" << a.stats.sp 
-         << " DU:" << a.stats.du << " IQ:" << a.stats.iq << "]\n";
+        << " DU:" << a.stats.du << " IQ:" << a.stats.iq << "]\n";
     cout << b.nama << " [AP:" << b.stats.ap << " SP:" << b.stats.sp 
-         << " DU:" << b.stats.du << " IQ:" << b.stats.iq << "]\n";
+        << " DU:" << b.stats.du << " IQ:" << b.stats.iq << "]\n";
 
     cout << "\n  Skor Pertarungan  \n";
     cout << a.nama << ": " << skorA << endl;
     cout << b.nama << ": " << skorB << endl;
 
-    cout << "\n=====================================\n";
-    if (skorA > skorB) {
-        cout << " Pemenang: " << a.nama << " !!!" << endl;
-    } else if (skorB > skorA) {
-        cout << " Pemenang: " << b.nama << " !!!" << endl;
-    } else {
-        cout << " Hasil seri! Pertarungan berakhir imbang." << endl;
-    }
+        string battle;
+        string pemenang;
+        battle = a.nama + " VS " + b.nama;
+        if (skorA > skorB) {
+            cout << " Pemenang: " << a.nama << " !!!" << endl;
+
+            riwayatBattle->top++;
+
+            riwayatBattle->battle[riwayatBattle->top] =
+            a.nama + " VS " + b.nama;
+
+            riwayatBattle->pemenang[riwayatBattle->top] =
+            a.nama;
+
+            riwayatBattle->ovr[riwayatBattle->top] =
+            hitungSkor(a.stats);
+
+        } else if (skorB > skorA) {
+            cout << " Pemenang: " << b.nama << " !!!" << endl;
+
+            riwayatBattle->top++;
+
+            riwayatBattle->battle[riwayatBattle->top] =
+            a.nama + " VS " + b.nama;
+
+            riwayatBattle->pemenang[riwayatBattle->top] =
+            b.nama;
+
+            riwayatBattle->ovr[riwayatBattle->top] =
+            hitungSkor(a.stats);
+
+        } else {
+            cout << " Hasil seri! Pertarungan berakhir imbang." << endl;
+
+            riwayatBattle->top++;
+
+            riwayatBattle->battle[riwayatBattle->top] =
+            a.nama + " VS " + b.nama;
+
+            riwayatBattle->pemenang[riwayatBattle->top] =
+            "DRAW";
+        }
     cout << "=====================================" << endl;
 }
 
-void battleKarakter(karakter karakterAnime[], int& jumlah_karakter){
+void battleKarakter(karakter karakterAnime[], int& jumlah_karakter, stack* riwayatBattle){
     int pilihan1, pilihan2;
     cls();
 
@@ -700,7 +879,7 @@ void battleKarakter(karakter karakterAnime[], int& jumlah_karakter){
         if (pilihan1 >= 1 && pilihan1 <= jumlah_karakter &&
             pilihan2 >= 1 && pilihan2 <= jumlah_karakter &&
             pilihan1 != pilihan2) {
-            duel(karakterAnime[pilihan1-1], karakterAnime[pilihan2-1]);
+            duel(karakterAnime[pilihan1-1], karakterAnime[pilihan2-1], riwayatBattle);
             enterKembali();
         } else {
             cout << "(Maaf, input tidak valid)";
@@ -716,7 +895,10 @@ void battleKarakter(karakter karakterAnime[], int& jumlah_karakter){
 
 int main(){
     akun pengguna[max_akun] = {{"mahdi", "067", "biasa"}, {"andi", "123", "premium"}};
-    // var stack nya
+    stack riwayatBattle; 
+    stack hapusRiwayat;
+    riwayatBattle.top = -1;
+    hapusRiwayat.top = -1;
     karakter karakterAnime[max_karakter] = {
         {2501, "Megumi Hayashida", "Crows", {100, 92, 100, 88}, "Rindaman / Tak Terkalahkan"},
         {2502, "Bouya Harumichi", "Crows", {99, 94, 98, 85}, "Padiko / Serigala Penyendiri"},
@@ -1213,7 +1395,7 @@ int main(){
                         break;
         
                 case 4:
-                    battleKarakter(karakterAnime, panjang_karakter);
+                    battleKarakter(karakterAnime, panjang_karakter, &riwayatBattle);
                     break;
 
                 default:
@@ -1369,15 +1551,15 @@ int main(){
                         break;
 
                     case 7:
-                        battleKarakter(karakterAnime, panjang_karakter);                    
+                        battleKarakter(karakterAnime, panjang_karakter, &riwayatBattle);                    
                         break;
                     
                     case 8:
-                        cout << "Ini riwayatBattle" << endl;
+                        tampilRiwayat(riwayatBattle);
                         break;
 
                     case 9:
-                        cout << "Ini hapusRiwayat" << endl;
+                        pop(&riwayatBattle, &hapusRiwayat);
                         break;
 
                     default:
