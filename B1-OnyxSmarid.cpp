@@ -630,8 +630,8 @@ void pop(stack riwayatBattle[], stack* hapusRiwayat, int* top){
     cls();
 
     if (*top == -1){
-        cout << "(Riwayat kosong)";
-        enterKembali();
+        cout << "(Tidak ada riwayat yang bisa dihapus, ketuk enter untuk kembali)";
+        cin.get();
         return;
     }
     hapusRiwayat->battle = riwayatBattle[*top].battle;
@@ -673,14 +673,13 @@ void pop(stack riwayatBattle[], stack* hapusRiwayat, int* top){
     enterKembali();
 }
 
-void tampilRiwayat(stack riwayatBattle[],
-                    int top){
+void tampilRiwayat(stack riwayatBattle[], int top){
 
     cls();
 
     if (top == -1){
-        cout << "(Belum ada riwayat)";
-        enterKembali();
+        cout << "(Belum ada riwayat, ketuk enter untuk kembali)";
+        cin.get();
         return;
     }
 
