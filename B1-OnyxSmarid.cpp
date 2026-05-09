@@ -33,10 +33,9 @@ struct akun{
 };
 
 struct stack{
-    string battle[100];
-    string pemenang[100];
-    double ovr[100];
-    int top;
+    string battle;
+    string pemenang;
+    double ovr;
 };
 
 
@@ -615,141 +614,110 @@ void fibonacciSearch(karakter* arr, int* panjang){
     }
 }
 
-void push(stack* s, string battle, string pemenang){
-    if (s->top == 99){
+void push(stack riwayatBattle[], int* top, string battle, string pemenang, double ovr){
+    if (*top == 99){
         cout << "(Stack penuh)";
         return;
     }
 
-    s->top++;
-    s->battle[s->top] = battle;
-    s->battle[s->top] = pemenang;
+    (*top)++;
+    riwayatBattle[*top].battle = battle;
+    riwayatBattle[*top].pemenang = pemenang;
+    riwayatBattle[*top].ovr = ovr;
 }
 
-void pop(stack* riwayatBattle, stack* hapusRiwayat){
+void pop(stack riwayatBattle[], stack* hapusRiwayat, int* top){
     cls();
 
-    if (riwayatBattle->top == -1){
+    if (*top == -1){
         cout << "(Riwayat kosong)";
         enterKembali();
         return;
     }
+    hapusRiwayat->battle = riwayatBattle[*top].battle;
+    hapusRiwayat->pemenang = riwayatBattle[*top].pemenang;
+    hapusRiwayat->ovr = riwayatBattle[*top].ovr;
 
-    hapusRiwayat->top++;
+    cout << "=================== RIWAYAT DIHAPUS ===================\n\n";
 
-    hapusRiwayat->battle[hapusRiwayat->top] =
-    riwayatBattle->battle[riwayatBattle->top];
-
-    hapusRiwayat->pemenang[hapusRiwayat->top] =
-    riwayatBattle->pemenang[riwayatBattle->top];
-
-    // TABEL BATTLE
-    cout << setfill('=') << setw(45) << "=" << endl;
+    cout << setfill('=') << setw(101) << "=" << endl;
     cout << setfill(' ');
 
     cout << "| " << left << setw(4) << "No"
-        << "| " << setw(35) << "Battle"
-        << "|" << endl;
-
-    cout << setfill('-') << setw(45) << "-" << endl;
-    cout << setfill(' ');
-
-    cout << "| " << left << setw(4) << 1
-        << "| " << setw(35)
-        << riwayatBattle->battle[riwayatBattle->top]
-        << "|" << endl;
-
-    cout << setfill('=') << setw(45) << "=" << endl;
-
-    cout << endl;
-
-    // TABEL PEMENANG
-    cout << setfill('=') << setw(45) << "=" << endl;
-    cout << setfill(' ');
-
-    cout << "| " << left << setw(4) << "No"
+        << "| " << setw(45) << "Battle"
         << "| " << setw(25) << "Pemenang"
+        << "| " << setw(18) << "OVR"
         << "|" << endl;
 
-    cout << setfill('-') << setw(45) << "-" << endl;
+    cout << setfill('-') << setw(101) << "-" << endl;
     cout << setfill(' ');
 
     cout << "| " << left << setw(4) << 1
+
+        << "| " << setw(45)
+        << hapusRiwayat->battle
+
         << "| " << setw(25)
-        << riwayatBattle->pemenang[riwayatBattle->top]
+        << hapusRiwayat->pemenang
+
+        << "| " << setw(18)
+        << hapusRiwayat->ovr
+
         << "|" << endl;
 
-    cout << setfill('=') << setw(45) << "=" << endl;
+    cout << setfill('=') << setw(101) << "=" << endl;
+    cout << setfill(' ');
 
-    riwayatBattle->top--;
+    (*top)--;
 
     enterKembali();
 }
 
-void tampilRiwayat(stack riwayatBattle){
+void tampilRiwayat(stack riwayatBattle[],
+                    int top){
+
     cls();
 
-    if (riwayatBattle.top == -1){
+    if (top == -1){
         cout << "(Belum ada riwayat)";
         enterKembali();
         return;
     }
-    cout << "========== RIWAYAT BATTLE ==========\n\n";
 
-    cout << setfill('=') << setw(71) << "=" << endl;
+    cout << "=================== RIWAYAT BATTLE ===================\n\n";
+
+    cout << setfill('=') << setw(101) << "=" << endl;
     cout << setfill(' ');
 
     cout << "| " << left << setw(4) << "No"
-        << "| " << left << setw(60) << "Battle"
+        << "| " << setw(45) << "Battle"
+        << "| " << setw(25) << "Pemenang"
+        << "| " << setw(18) << "OVR"
         << "|" << endl;
 
-    cout << setfill('-') << setw(71) << "-" << endl;
+    cout << setfill('-') << setw(101) << "-" << endl;
     cout << setfill(' ');
 
     int nomor = 1;
 
-    for (int i = riwayatBattle.top; i >= 0; i--){
+    for (int i = top; i >= 0; i--){
 
         cout << "| " << left << setw(4)
             << nomor++
 
-            << "| " << left << setw(60)
-            << riwayatBattle.battle[i]
+            << "| " << setw(45)
+            << riwayatBattle[i].battle
+
+            << "| " << setw(25)
+            << riwayatBattle[i].pemenang
+
+            << "| " << setw(18)
+            << riwayatBattle[i].ovr
 
             << "|" << endl;
     }
 
-    cout << setfill('=') << setw(71) << "=" << endl;
-
-    cout << endl << endl;
-    
-    cout << setfill('=') << setw(58) << "=" << endl;
-    cout << setfill(' ');
-
-    cout << "| " << left << setw(4) << "No"
-        << "| " << left << setw(30) << "Pemenang"
-        << "| " << left << setw(15) << "OVR"
-        << "|" << endl;
-
-    cout << setfill('-') << setw(58) << "-" << endl;
-    cout << setfill(' ');
-
-    nomor = 1;
-
-    for (int i = riwayatBattle.top; i >= 0; i--){
-
-        cout << "| " << left << setw(4)
-            << nomor++
-
-            << "| " << left << setw(30)
-            << riwayatBattle.pemenang[i]
-            << "| " << left << setw(15)
-            << riwayatBattle.ovr[i]
-
-            << "|" << endl;
-    }
-
-    cout << setfill('=') << setw(58) << "=" << endl;
+    cout << setfill('=') << setw(101) << "=" << endl;
     cout << setfill(' ');
 
     enterKembali();
@@ -772,7 +740,7 @@ void efekLoading(string teks){
     cout << endl;
 }
 
-void duel(karakter& a, karakter& b, stack* riwayatBattle){
+void duel(karakter& a, karakter& b, stack riwayatBattle[], int* top){
     srand(time(0));
     double skorA = hitungSkor(a.stats);
     double skorB = hitungSkor(b.stats);
@@ -803,50 +771,27 @@ void duel(karakter& a, karakter& b, stack* riwayatBattle){
 
         string battle;
         string pemenang;
+        double ovr;
         battle = a.nama + " VS " + b.nama;
         if (skorA > skorB) {
             cout << " Pemenang: " << a.nama << " !!!" << endl;
-
-            riwayatBattle->top++;
-
-            riwayatBattle->battle[riwayatBattle->top] =
-            a.nama + " VS " + b.nama;
-
-            riwayatBattle->pemenang[riwayatBattle->top] =
-            a.nama;
-
-            riwayatBattle->ovr[riwayatBattle->top] =
-            hitungSkor(a.stats);
+            pemenang = a.nama;
+            ovr = skorA;
 
         } else if (skorB > skorA) {
             cout << " Pemenang: " << b.nama << " !!!" << endl;
-
-            riwayatBattle->top++;
-
-            riwayatBattle->battle[riwayatBattle->top] =
-            a.nama + " VS " + b.nama;
-
-            riwayatBattle->pemenang[riwayatBattle->top] =
-            b.nama;
-
-            riwayatBattle->ovr[riwayatBattle->top] =
-            hitungSkor(a.stats);
+            pemenang = b.nama;
+            ovr = skorB;
 
         } else {
             cout << " Hasil seri! Pertarungan berakhir imbang." << endl;
-
-            riwayatBattle->top++;
-
-            riwayatBattle->battle[riwayatBattle->top] =
-            a.nama + " VS " + b.nama;
-
-            riwayatBattle->pemenang[riwayatBattle->top] =
-            "DRAW";
+            pemenang = "DRAW";
         }
+        push(riwayatBattle, top, battle, pemenang, ovr);
     cout << "=====================================" << endl;
 }
 
-void battleKarakter(karakter karakterAnime[], int& jumlah_karakter, stack* riwayatBattle){
+void battleKarakter(karakter karakterAnime[], int& jumlah_karakter, stack riwayatBattle[], int* top){
     int pilihan1, pilihan2;
     cls();
 
@@ -879,7 +824,7 @@ void battleKarakter(karakter karakterAnime[], int& jumlah_karakter, stack* riway
         if (pilihan1 >= 1 && pilihan1 <= jumlah_karakter &&
             pilihan2 >= 1 && pilihan2 <= jumlah_karakter &&
             pilihan1 != pilihan2) {
-            duel(karakterAnime[pilihan1-1], karakterAnime[pilihan2-1], riwayatBattle);
+            duel(karakterAnime[pilihan1-1], karakterAnime[pilihan2-1], riwayatBattle, top);
             enterKembali();
         } else {
             cout << "(Maaf, input tidak valid)";
@@ -895,10 +840,9 @@ void battleKarakter(karakter karakterAnime[], int& jumlah_karakter, stack* riway
 
 int main(){
     akun pengguna[max_akun] = {{"mahdi", "067", "biasa"}, {"andi", "123", "premium"}};
-    stack riwayatBattle; 
+    stack riwayatBattle[100]; 
     stack hapusRiwayat;
-    riwayatBattle.top = -1;
-    hapusRiwayat.top = -1;
+    int top = -1;
     karakter karakterAnime[max_karakter] = {
         {2501, "Megumi Hayashida", "Crows", {100, 92, 100, 88}, "Rindaman / Tak Terkalahkan"},
         {2502, "Bouya Harumichi", "Crows", {99, 94, 98, 85}, "Padiko / Serigala Penyendiri"},
@@ -1395,7 +1339,7 @@ int main(){
                         break;
         
                 case 4:
-                    battleKarakter(karakterAnime, panjang_karakter, &riwayatBattle);
+                    battleKarakter(karakterAnime, panjang_karakter, riwayatBattle, &top);
                     break;
 
                 default:
@@ -1551,15 +1495,15 @@ int main(){
                         break;
 
                     case 7:
-                        battleKarakter(karakterAnime, panjang_karakter, &riwayatBattle);                    
+                        battleKarakter(karakterAnime, panjang_karakter, riwayatBattle, &top);                    
                         break;
                     
                     case 8:
-                        tampilRiwayat(riwayatBattle);
+                        tampilRiwayat(riwayatBattle, top);
                         break;
 
                     case 9:
-                        pop(&riwayatBattle, &hapusRiwayat);
+                        pop(riwayatBattle, &hapusRiwayat, &top);
                         break;
 
                     default:
