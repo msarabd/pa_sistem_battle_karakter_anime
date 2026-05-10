@@ -63,6 +63,24 @@ void enterKembali() {
     cin.get(); 
 }
 
+void progressBar(){
+    cls();
+    int panjangBar = 50;
+    char kosong = 177;
+    char isi = 219;
+
+    cout << "\nLoading...\n\n";
+    for (int i = 0; i < panjangBar; i++)
+        cout << kosong;
+
+    cout << "\r";
+    for (int i = 0; i < panjangBar; i++) {
+        cout << isi << flush;
+        this_thread::sleep_for(chrono::milliseconds(50));
+    }
+    cout << endl;
+}
+
 void iklan(string array[], int jumlahIklan){
     cls();
     int seconds = 5;
@@ -1180,6 +1198,7 @@ int main(){
                 
                 case 1:
                     index_pengguna = loginUser(pengguna, sisa_login, token_utama, token_login, panjang_user, header_loginUser);
+                    progressBar();
                     break;
                 
                 case 2:
