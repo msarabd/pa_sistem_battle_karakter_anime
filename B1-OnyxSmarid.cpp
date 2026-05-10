@@ -141,6 +141,7 @@ int loginUser(akun arr[], int& sisa_login, bool& token_utama, bool& token_login,
                 token_login = false;
                 cout << "(Login berhasil, ketuk enter untuk lanjut)";
                 cin.get();
+                progressBar();
                 return i;
             } else {
                 sisa_login--;
@@ -173,9 +174,8 @@ void registerUser(akun arr[], string header, int* panjang_user){
     tampilkan(header);
     cout << "Masukkan username: ";
     cin >> tampung;
-    cin.ignore(numeric_limits<streamsize>::max(), '\n');
     input_user = cekUser(arr, tampung, *panjang_user);
-
+    
     if (input_user != "0"){
         arr[*panjang_user].user = input_user;
         cout << "Masukkan password: ";
@@ -190,6 +190,7 @@ void registerUser(akun arr[], string header, int* panjang_user){
             cout << "(AKUN ANDA SEKARANG ADALAH PREMIUM!!)" << endl;
         } else {
             arr[*panjang_user].status = "biasa";
+            cout << "(MAAP KODE REFERRAL ANDA SALAH!!)" << endl;
         }
         (*panjang_user)++;
         
@@ -235,16 +236,15 @@ void tampilKarakter(karakter arr[], int panjang_karakter){
 
         cout << setfill('=') << setw(143) << "=" << endl;
         cout << setfill(' ');
+        enterKembali();
     }
-
-    enterKembali();
 }
 
 void tambahKarakter(karakter arr[], int* panjang_karakter){
     int jumlah_tambah;
 
     cls();
-    if (*panjang_karakter == max_karakter){
+    if (*panjang_karakter >= max_karakter){
         cout << "(List sudah penuh, hapus satu atau lebih karakter)";
         cin.get();
 
@@ -301,7 +301,6 @@ void tambahKarakter(karakter arr[], int* panjang_karakter){
         }
         
         catch (exception& e){
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
             cout << e.what();
             cin.get();
         }
@@ -320,20 +319,22 @@ void perbaruiKarakter(karakter arr[], int panjang_karakter){
     } else {
         cout << "Mau perbarui berapa karakter: ";
         cin >> jumlah_update;
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
-
+        
         try{
             if (cin.fail()){
                 cin.clear();
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
                 throw invalid_argument("(Input harus berupa angka, ketuk enter untuk kembali)");
             }
 
             if (cin.peek() != '\n' && !cin.eof()){
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
                 throw invalid_argument("(Input tidak boleh desimal/huruf, ketuk enter untuk kembali)");
             }
 
             if (jumlah_update > panjang_karakter){
                 cout << "(Jumlah karakter hanya ada " << panjang_karakter << ")";
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
                 cin.get();
 
             } else if (jumlah_update > 0){
@@ -373,12 +374,12 @@ void perbaruiKarakter(karakter arr[], int panjang_karakter){
                 
             } else {
                 cout << "(Maaf, input tidak valid)";
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
                 cin.get();
             }
         }
 
         catch (exception& e){
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
             cout << e.what();
             cin.get();
         }
@@ -1038,6 +1039,7 @@ int main(){
              ''-._______________________________.-'' 
 
 )";
+
     string iklanD = R"(
 +-------------------------------------------+
 |         +=======================+         |   SEGERA HADIR
@@ -1062,6 +1064,7 @@ int main(){
 ||              Coming Soon                ||
 +\=========================================/+
 )";
+
     string iklanE = R"(
 ..........................................................
 .                                                        .
@@ -1089,7 +1092,7 @@ int main(){
     string menu_login = R"(=====================================
 |           LOGIN DULU YAA          |
 =====================================
-| 1) Login User Biasa               |
+| 1) Login                          |
 | 2) Register                       |
 | 0) Keluar                         |
 =====================================
@@ -1145,7 +1148,7 @@ int main(){
 )";
 
     string header_loginUser = R"(============================
-|     LOGIN USER BIASA     |
+|           LOGIN          |
 ============================)";
 
     string header_register = R"(============================
@@ -1198,7 +1201,6 @@ int main(){
                 
                 case 1:
                     index_pengguna = loginUser(pengguna, sisa_login, token_utama, token_login, panjang_user, header_loginUser);
-                    progressBar();
                     break;
                 
                 case 2:
@@ -1357,6 +1359,7 @@ int main(){
                         break;
         
                 case 4:
+                    iklan(arrayIklan, 5);
                     battleKarakter(karakterAnime, panjang_karakter, riwayatBattle, &top);
                     break;
 
