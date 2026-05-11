@@ -6,6 +6,7 @@
 #include <ctime>
 #include <thread>
 #include <chrono>
+#include "animasi.h"
 using namespace std;
 
 const int max_karakter = 200;
@@ -1218,6 +1219,8 @@ int main(){
         }
     }
     
+    putarAnimasi();
+    cin.get();
     if (pengguna[index_pengguna].status == "biasa"){
         while (token_utama){
             tampilkan(menu_biasa, 0, 4);

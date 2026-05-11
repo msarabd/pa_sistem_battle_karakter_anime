@@ -1,9 +1,11 @@
+#include "animasi.h"
 #include <iostream>
+#include <string>
 #include <thread>
 #include <chrono>
 using namespace std;
 
-int main(){
+void putarAnimasi(){
     string frame1 = R"(
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -1332,5 +1334,6 @@ string frame7 = R"(
         cout << array[i];
         std::this_thread::sleep_for(std::chrono::milliseconds(200));
     }
-    return 0;
+
+    cout << "\033[22A\033[40D";
 }
