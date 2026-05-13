@@ -5,6 +5,9 @@
 #include <chrono>
 using namespace std;
 
+#define RESET   "\033[0m"
+#define OREN    "\033[38;5;208m"
+
 void putarAnimasi(){
     string frame1 = R"(
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -1331,7 +1334,7 @@ string frame7 = R"(
 
     for (int i = 0; i < n; i++){
         system("cls");
-        cout << array[i];
+        cout << OREN << array[i];
         std::this_thread::sleep_for(std::chrono::milliseconds(200));
     }
 
