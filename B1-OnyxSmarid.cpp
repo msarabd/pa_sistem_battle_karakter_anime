@@ -210,12 +210,11 @@ void registerUser(akun arr[], string header, int* panjang_user){
 void tampilKarakter(karakter arr[], int panjang_karakter){
     cls();
     if (panjang_karakter == 0){
-        cout << MERAH << "(List kosong, tidak ada data yang bisa dilihat)";
+        cout << MERAH << "(List kosong, tidak ada data yang bisa dilihat)" << RESET;
         cin.get();
 
     } else {
-        cout << KUNING;
-        cout << setfill('=') << setw(145) << "=" << endl;
+        cout << KUNING << setfill('=') << setw(145) << "=" << endl;
         cout << setfill(' ');
         cout << "| " << left << setw(4)  << "No" 
             << "| " << setw(8) << "ID"
@@ -231,7 +230,6 @@ void tampilKarakter(karakter arr[], int panjang_karakter){
         cout << setfill(' '); 
 
         for (int i = 0; i < panjang_karakter; i++) {
-            cout << KUNING;
             cout << "| " << left << setw(4) << (i + 1)
                 << "| " << setw(8) << arr[i].id
                 << "| " << setw(25) << arr[i].nama
@@ -242,9 +240,8 @@ void tampilKarakter(karakter arr[], int panjang_karakter){
                 << "| " << setw(5)  << arr[i].stats.iq
                 << "| " << setw(32) << arr[i].ket << " |" << endl;
         }
-        cout << KUNING;
         cout << setfill('=') << setw(145) << "=" << endl;
-        cout << setfill(' ');
+        cout << setfill(' ') << RESET;
         enterKembali();
     }
 }
@@ -702,7 +699,6 @@ void pop(stack riwayatBattle[], stack* hapusRiwayat, int* top){
 }
 
 void tampilRiwayat(stack riwayatBattle[], int top){
-
     cls();
 
     if (top == -1){
