@@ -1339,4 +1339,5 @@ string frame7 = R"(
     }
 
     cout << "\033[22A\033[40D";
+    cin.get();
 }

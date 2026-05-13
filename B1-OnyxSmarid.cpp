@@ -112,7 +112,7 @@ void iklan(string array[], int jumlahIklan){
 void tampilkan(string menu, int a, int b){
     cls();
     cout << OREN << menu;
-    cout << "Pilih (" << a << "-" << b << "): "; 
+    cout << "Pilih (" << a << "-" << b << "): " << RESET; 
 }
 
 void tampilkan(string kata){
@@ -556,20 +556,20 @@ void linearSearch(karakter* arr, int* panjang){
     getline(cin, target);
 
     for (int i = 0; i < *panjang; i++){
-        cout << OREN << "\n== iterasi ke-" << i + 1 << " ==" << endl;
+        cout << OREN << "\n== iterasi ke-" << i + 1 << " ==" << RESET << endl;
 
         if (target == (arr + i)->nama){
-            cout << BIRU << target << " = " << (arr + i)->nama << endl;
+            cout << OREN << target << " = " << (arr + i)->nama << RESET << endl;
             cout << HIJAU << "(" << target << " ditemukan pada indeks ke-" << i << ")";
             cin.get();
             return;
         } else {
-            cout << MERAH << target  << " != " << (arr + i)->nama << endl;
-            cout << MERAH << "(tidak ditemukan)" << endl;
+            cout << OREN << target  << " != " << (arr + i)->nama << RESET << endl;
+            cout << MERAH << "(tidak ditemukan)" << RESET << endl;
         }
     }
     
-    cout << MERAH << "\n(" << target << " tidak ditemukan pada data karakter" << ")";
+    cout << MERAH << "\n(" << target << " tidak ditemukan pada data karakter" << ")" << RESET;
     cin.get();
 }
 
@@ -607,37 +607,36 @@ void fibonacciSearch(karakter* arr, int* panjang){
 
         int j = 1;
         while (fib > 1){
-            cout << OREN << "\n== iterasi ke-" << j << " ==" << endl;
+            cout << OREN << "\n== iterasi ke-" << j << " ==" << RESET << endl;
             index = min(offset + fib2, *panjang - 1);
             if ((arr + index)->id == target){
-                cin.ignore();
-                cout << (arr + index)->id << " = " << target << endl;
+                cout << OREN << (arr + index)->id << " = " << target << RESET << endl;
                 cout << HIJAU << "("<< target << " ditemukan pada index ke-" << index << ")" << RESET;
                 cin.get();
                 return;
             } else if ((arr + index)->id < target){
-                cout << OREN << (arr + index)->id << " < " << target << endl;
+                cout << OREN << (arr + index)->id << " < " << target << RESET << endl;
                 fib = fib1;
                 fib1 = fib2;
                 fib2 = fib - fib1;
                 offset = index;
             } else {
-                cout << OREN << (arr + index)->id << " > " << target << endl;
+                cout << OREN << (arr + index)->id << " > " << target << RESET << endl;
                 fib = fib2;
                 fib1 = fib1 - fib2;
                 fib2 = fib - fib1;
             }
 
-            cout << MERAH << "(tidak ditemukan)" << endl;
+            cout << MERAH << "(tidak ditemukan)" << RESET << endl;
             j++;
         }
 
-        cout << MERAH << "\n(" << target << " tidak ditemukan pada data karakter)" << RESET; 
+        cout << MERAH << "\n(ID " << target << " tidak ditemukan pada data karakter)" << RESET; 
         cin.get();
     }
     
     catch (exception& e){
-        cout << MERAH << e.what();
+        cout << MERAH << e.what() << RESET;
         cin.get();
     }
 }
@@ -1229,9 +1228,8 @@ int main(){
         }
     }
     
-    putarAnimasi();
-    cin.get();
     if (pengguna[index_pengguna].status == "biasa"){
+        putarAnimasi();
         while (token_utama){
             tampilkan(menu_biasa, 0, 4);
             cin >> pilihan_2;
@@ -1388,6 +1386,7 @@ int main(){
         }
     
     } else if (pengguna[index_pengguna].status == "premium"){
+        putarAnimasi();
         while (token_utama){
             tampilkan(menu_premium, 0, 9);
             cin >> pilihan_2;
