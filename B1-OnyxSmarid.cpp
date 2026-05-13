@@ -9,7 +9,8 @@
 #include "animasi.h"
 using namespace std;
 
-#define RESET   "\033[0m"
+//pewarnaan 
+#define RESET   "\033[0m" 
 #define MERAH   "\033[31m"
 #define HIJAU   "\033[32m"
 #define KUNING  "\033[33m"
@@ -105,13 +106,13 @@ void iklan(string array[], int jumlahIklan){
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
     
-    cout << KUNING << "\n(Ketuk enter untuk lanjut)" << RESET;
+    cout << KUNING << "\n(Ketuk enter untuk lanjut)";
     cin.get();
 }
 
 void tampilkan(string menu, int a, int b){
     cls();
-    cout << OREN << menu;
+    cout << OREN << menu << RESET;
     cout << "Pilih (" << a << "-" << b << "): "; 
 }
 
@@ -147,7 +148,7 @@ int loginUser(akun arr[], int& sisa_login, bool& token_utama, bool& token_login,
             if (input_pw == arr[i].pw){
                 token_utama = true;
                 token_login = false;
-                cout << HIJAU << "(Login berhasil, ketuk enter untuk lanjut)";
+                cout << HIJAU << "(Login berhasil, ketuk enter untuk lanjut)" << RESET;
                 cin.get();
                 progressBar();
                 return i;
@@ -161,7 +162,7 @@ int loginUser(akun arr[], int& sisa_login, bool& token_utama, bool& token_login,
 
         if (i == panjang_user - 1){
             sisa_login--;
-            cout << MERAH "(User tidak ditemukan, sisa login Anda = " << sisa_login << ")" << RESET;
+            cout << MERAH "(User tidak ditemukan, sisa login Anda = " << sisa_login << ")";
             cin.get();
         }
     }
@@ -276,7 +277,7 @@ void tambahKarakter(karakter arr[], int* panjang_karakter){
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
             if (jumlah_tambah > 0){
                 for (int i = 0; i < jumlah_tambah; i++){
-                    cout << OREN  "\nKarakter ke-" << i + 1 << endl;
+                    cout << OREN << "\nKarakter ke-" << i + 1 << endl;
                     cout << "Nama karakter: " << RESET;
                     getline(cin, arr[*panjang_karakter].nama);
 
@@ -342,14 +343,14 @@ void perbaruiKarakter(karakter arr[], int panjang_karakter){
             }
 
             if (jumlah_update > panjang_karakter){
-                cout << MERAH << "(Jumlah karakter hanya ada " << panjang_karakter << ")";
+                cout << MERAH << "(Jumlah karakter hanya ada " << panjang_karakter << ")" << RESET;
                 cin.ignore(numeric_limits<streamsize>::max(), '\n');
                 cin.get();
 
             } else if (jumlah_update > 0){
                 for (int i = 0; i < jumlah_update; i++){
                     cout << OREN << "\nKarakter ke-" << i + 1 << endl;
-                    cout << "Masukkan nomor karakter: " << RESET;
+                    cout << OREN << "Masukkan nomor karakter: " << RESET;
                     cin >> elemen;
                     cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
@@ -382,7 +383,7 @@ void perbaruiKarakter(karakter arr[], int panjang_karakter){
                 enterKembali();
                 
             } else {
-                cout << MERAH << "(Maaf, input tidak valid)";
+                cout << MERAH << "(Maaf, input tidak valid)" ;
                 cin.ignore(numeric_limits<streamsize>::max(), '\n');
                 cin.get();
             }
@@ -518,7 +519,7 @@ void selectionSort(karakter arr[], string atribut, int panjang){
 void insertionSort(karakter arr[], string atribut, int panjang){
     cls();
     if (panjang == 0){
-        cout << MERAH << "(List kosong, tidak ada data yang bisa disorting)" << RESET;
+        cout << MERAH << "(List kosong, tidak ada data yang bisa disorting)";
         cin.get();
         return;
     }
@@ -559,7 +560,7 @@ void linearSearch(karakter* arr, int* panjang){
         cout << OREN << "\n== iterasi ke-" << i + 1 << " ==" << endl;
 
         if (target == (arr + i)->nama){
-            cout << BIRU << target << " = " << (arr + i)->nama << endl;
+            cout << OREN << target << " = " << (arr + i)->nama << endl;
             cout << HIJAU << "(" << target << " ditemukan pada indeks ke-" << i << ")";
             cin.get();
             return;
@@ -611,8 +612,8 @@ void fibonacciSearch(karakter* arr, int* panjang){
             index = min(offset + fib2, *panjang - 1);
             if ((arr + index)->id == target){
                 cin.ignore();
-                cout << (arr + index)->id << " = " << target << endl;
-                cout << HIJAU << "("<< target << " ditemukan pada index ke-" << index << ")" << RESET;
+                cout << OREN << (arr + index)->id << " = " << target << endl;
+                cout << HIJAU << "("<< target << " ditemukan pada index ke-" << index << ")";
                 cin.get();
                 return;
             } else if ((arr + index)->id < target){
@@ -632,7 +633,7 @@ void fibonacciSearch(karakter* arr, int* panjang){
             j++;
         }
 
-        cout << MERAH << "\n(" << target << " tidak ditemukan pada data karakter)" << RESET; 
+        cout << MERAH << "\n(" << target << " tidak ditemukan pada data karakter)"; 
         cin.get();
     }
     
