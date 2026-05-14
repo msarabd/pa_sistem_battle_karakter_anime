@@ -1336,6 +1336,7 @@ string frame7 = R"(
         system("cls");
         cout << OREN << array[i];
         std::this_thread::sleep_for(std::chrono::milliseconds(200));
+        cout << RESET;
     }
 
     cout << "\033[22A\033[40D";
