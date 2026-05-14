@@ -93,19 +93,21 @@ void iklan(string array[], int jumlahIklan){
     cls();
     int seconds = 5;
     int index = rand() % jumlahIklan;
-    cout << BIRU << array[index] << RESET;
-    // while (seconds > 0) {
-    //     cout << "lewati dalam: " << seconds << " detik" << endl;
-    //     this_thread::sleep_for(chrono::seconds(1));
-    //     seconds--;
-    // }
-
-    for (int i = 0; i <= 100; i++) {
-        std::cout << BIRU << "\rProgress: " << i << "%" << std::flush << RESET;
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
-    }
+    cout << BIRU << array[index] << RESET << endl;
     
-    cout << KUNING << "\n(Ketuk enter untuk lanjut)" << RESET;
+    while (seconds >= 0) {
+        cout << BIRU << "Lewati iklan dalam: " << seconds << " detik" << flush << RESET;
+        this_thread::sleep_for(chrono::seconds(1));
+        cout << "\r"; 
+        seconds--;
+    }
+
+    // for (int i = 0; i <= 100; i++) {
+    //     std::cout << BIRU << "Progress: " << i << "%" << std::flush << RESET;
+    //     std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    // }
+    
+    cout << KUNING << "(Ketuk enter untuk lanjut) " << RESET;
     cin.get();
 }
 
@@ -404,18 +406,20 @@ void hapusKarakter(karakter arr[], int *panjang_karakter){
     } else {
         cout << OREN << "Masukkan nomor karakter: " << RESET;
         cin >> elemen;
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
         
         try{
             if (cin.fail()){
                 cin.clear();
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
                 throw invalid_argument("(Input harus berupa angka, ketuk enter untuk kembali)");
             }
 
             if (cin.peek() != '\n' && !cin.eof()){
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
                 throw invalid_argument("(Input tidak boleh desimal/huruf, ketuk enter untuk kembali)");
             }
             
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
             if (elemen > 0 && elemen <= *panjang_karakter){
                 cout << HIJAU << "(" << arr[elemen - 1].nama << " berhasil dihapus, ketuk enter untuk kembali)" << RESET;
                 for (int i = elemen - 1; i < *panjang_karakter - 1; i++){
@@ -430,7 +434,6 @@ void hapusKarakter(karakter arr[], int *panjang_karakter){
         }
 
         catch (exception& e){
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
             cout << MERAH << e.what() << RESET;
             cin.get();
         }
