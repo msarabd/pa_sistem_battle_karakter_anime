@@ -2,6 +2,7 @@
 #include <iomanip>
 #include <cstdlib>
 #include <string>
+#include <cctype>
 #include <limits>
 #include <ctime>
 #include <thread>
@@ -53,6 +54,14 @@ void cls(){
     #else
         cout << "\033[2J\033[1;1H";
 #endif
+}
+
+string trim(const string& str) {
+    size_t first = str.find_first_not_of(" \t\n\r");
+    if (first == string::npos) return "";
+
+    size_t last = str.find_last_not_of(" \t\n\r");
+    return str.substr(first, (last - first + 1));
 }
 
 void enterKembali() {
@@ -139,10 +148,11 @@ int loginUser(akun arr[], int& sisa_login, bool& token_utama, bool& token_login,
     cls();
     tampilkan(header);
     cout << OREN << "Masukkan username: " << RESET;
-    cin >> input_user;
+    getline(cin, input_user);
+    input_user = trim(input_user);
     cout << OREN << "Masukkan password: " << RESET;
-    cin >> input_pw;
-    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    getline(cin, input_pw);
+    input_pw = trim(input_pw);
     
     for (int i = 0; i < panjang_user; i++){
         if (input_user == arr[i].user){
@@ -265,7 +275,7 @@ void tambahKarakter(karakter arr[], int* panjang_karakter){
             if (cin.fail()){
                 cin.clear();
                 cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                throw invalid_argument("(Input harus berupa angka, ketuk enter untuk kembali)");
+                throw invalid_argument("(Input harus berupa angka/input terlalu besar, ketuk enter untuk kembali)");
             }
 
             if (cin.peek() != '\n' && !cin.eof()){
@@ -279,9 +289,11 @@ void tambahKarakter(karakter arr[], int* panjang_karakter){
                     cout << OREN << "\nKarakter ke-" << i + 1 << endl;
                     cout << "Nama karakter: " << RESET;
                     getline(cin, arr[*panjang_karakter].nama);
+                    arr[*panjang_karakter].nama = trim(arr[*panjang_karakter].nama);
 
                     cout << OREN << "Dari anime/manga: " << RESET;
                     getline(cin, arr[*panjang_karakter].anime);
+                    arr[*panjang_karakter].anime = trim(arr[*panjang_karakter].anime);
                     
                     cout << OREN << "Attack power (0-100): " << RESET;
                     cin >> arr[*panjang_karakter].stats.ap;
@@ -295,6 +307,7 @@ void tambahKarakter(karakter arr[], int* panjang_karakter){
 
                     cout << OREN << "Keterangan (isi '-' jika kosong): " << RESET;
                     getline(cin, arr[*panjang_karakter].ket);
+                    arr[*panjang_karakter].ket = trim(arr[*panjang_karakter].ket);
 
                     arr[*panjang_karakter].id = 2500 + *panjang_karakter + 1;
                     cout << HIJAU << "(Berhasil menambahkan karakter)" << RESET << endl;
@@ -333,7 +346,7 @@ void perbaruiKarakter(karakter arr[], int panjang_karakter){
             if (cin.fail()){
                 cin.clear();
                 cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                throw invalid_argument("(Input harus berupa angka, ketuk enter untuk kembali)");
+                throw invalid_argument("(Input harus berupa angka/input terlalu besar, ketuk enter untuk kembali)");
             }
 
             if (cin.peek() != '\n' && !cin.eof()){
@@ -356,9 +369,11 @@ void perbaruiKarakter(karakter arr[], int panjang_karakter){
                     if (elemen > 0 && elemen <= panjang_karakter){
                         cout << OREN << "Nama karakter: " << RESET;
                         getline(cin, arr[elemen - 1].nama);
+                        arr[elemen - 1].nama = trim(arr[elemen - 1].nama);
 
                         cout << OREN << "Dari anime/manga: " << RESET;
                         getline(cin, arr[elemen - 1].anime);
+                        arr[elemen - 1].anime = trim(arr[elemen - 1].anime);
                         
                         cout << OREN << "Attack power (0-100): " << RESET;
                         cin >> arr[elemen - 1].stats.ap;
@@ -372,6 +387,7 @@ void perbaruiKarakter(karakter arr[], int panjang_karakter){
 
                         cout << OREN << "Keterangan (isi '-' jika kosong): " << RESET;
                         getline(cin, arr[elemen - 1].ket);
+                        arr[elemen - 1].ket = trim(arr[elemen - 1].ket);
                         cout << HIJAU << "(Data karakter berhasil diperbarui)" << RESET << endl;
                     } else {
                         cout << MERAH << "(Maaf, nomor karakter tidak valid)" << RESET;
@@ -411,7 +427,7 @@ void hapusKarakter(karakter arr[], int *panjang_karakter){
             if (cin.fail()){
                 cin.clear();
                 cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                throw invalid_argument("(Input harus berupa angka, ketuk enter untuk kembali)");
+                throw invalid_argument("(Input harus berupa angka/input terlalu besar, ketuk enter untuk kembali)");
             }
 
             if (cin.peek() != '\n' && !cin.eof()){
@@ -555,6 +571,7 @@ void linearSearch(karakter* arr, int* panjang){
     cls();
     cout << OREN << "Masukkan nama karakter yang ingin dicari: " << RESET;
     getline(cin, target);
+    target = trim(target);
 
     for (int i = 0; i < *panjang; i++){
         cout << OREN << "\n== iterasi ke-" << i + 1 << " ==" << RESET << endl;
@@ -591,7 +608,7 @@ void fibonacciSearch(karakter* arr, int* panjang){
         if (cin.fail()){
             cin.clear();
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            throw invalid_argument("(Input harus berupa angka, ketuk enter untuk kembali)");
+            throw invalid_argument("(Input harus berupa angka/input terlalu besar, ketuk enter untuk kembali)");
         }
 
         if (cin.peek() != '\n' && !cin.eof()){
@@ -654,7 +671,7 @@ void push(stack riwayatBattle[], int* top, string battle, string pemenang, doubl
     riwayatBattle[*top].ovr = ovr;
 }
 
-void pop(stack riwayatBattle[], stack* hapusRiwayat, int* top){
+void hapusRiwayat(stack riwayatBattle[], stack* tampung_riwayat, int* top){
     cls();
 
     if (*top == -1){
@@ -662,9 +679,9 @@ void pop(stack riwayatBattle[], stack* hapusRiwayat, int* top){
         cin.get();
         return;
     }
-    hapusRiwayat->battle = riwayatBattle[*top].battle;
-    hapusRiwayat->pemenang = riwayatBattle[*top].pemenang;
-    hapusRiwayat->ovr = riwayatBattle[*top].ovr;
+    tampung_riwayat->battle = riwayatBattle[*top].battle;
+    tampung_riwayat->pemenang = riwayatBattle[*top].pemenang;
+    tampung_riwayat->ovr = riwayatBattle[*top].ovr;
 
     cout << KUNING;
     cout << "=================== RIWAYAT DIHAPUS ===================\n\n";
@@ -684,13 +701,13 @@ void pop(stack riwayatBattle[], stack* hapusRiwayat, int* top){
     cout << "| " << left << setw(4) << 1
 
         << "| " << setw(45)
-        << hapusRiwayat->battle
+        << tampung_riwayat->battle
 
         << "| " << setw(25)
-        << hapusRiwayat->pemenang
+        << tampung_riwayat->pemenang
 
         << "| " << setw(18)
-        << hapusRiwayat->ovr
+        << tampung_riwayat->ovr
 
         << "|" << endl;
 
@@ -829,7 +846,7 @@ void battleKarakter(karakter karakterAnime[], int& jumlah_karakter, stack riwaya
         if (!(cin >> pilihan1)){
             cin.clear(); 
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            throw invalid_argument("(Input harus berupa angka, ketuk enter untuk kembali)");
+            throw invalid_argument("(Input harus berupa angka/input terlalu besar, ketuk enter untuk kembali)");
         }
         
         if (cin.peek() != '\n' && !cin.eof()){
@@ -841,7 +858,7 @@ void battleKarakter(karakter karakterAnime[], int& jumlah_karakter, stack riwaya
         if (!(cin >> pilihan2)){
             cin.clear();
             cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            throw invalid_argument("(Input harus berupa angka, ketuk enter untuk kembali)");
+            throw invalid_argument("(Input harus berupa angka/input terlalu besar, ketuk enter untuk kembali)");
         }
 
         if (cin.peek() != '\n' && !cin.eof()){
@@ -870,7 +887,7 @@ void battleKarakter(karakter karakterAnime[], int& jumlah_karakter, stack riwaya
 int main(){
     akun pengguna[max_akun] = {{"mahdi", "067", "biasa"}, {"andi", "123", "premium"}};
     stack riwayatBattle[100]; 
-    stack hapusRiwayat;
+    stack tampung_riwayat;
     int top = -1;
     karakter karakterAnime[max_karakter] = {
         {2501, "Megumi Hayashida", "Crows", {100, 92, 100, 88}, "Rindaman / Tak Terkalahkan"},
@@ -1196,7 +1213,7 @@ int main(){
             if (cin.fail()){
                 cin.clear();
                 cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                throw invalid_argument("(Input harus berupa angka, ketuk enter untuk kembali)");
+                throw invalid_argument("(Input harus berupa angka/input terlalu besar, ketuk enter untuk kembali)");
             }
 
             if (cin.peek() != '\n' && !cin.eof()){
@@ -1239,7 +1256,7 @@ int main(){
                 if (cin.fail()){
                     cin.clear();
                     cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                    throw invalid_argument("(Input harus berupa angka, ketuk enter untuk kembali)");
+                    throw invalid_argument("(Input harus berupa angka/input terlalu besar, ketuk enter untuk kembali)");
                 }
     
                 if (cin.peek() != '\n' && !cin.eof()){
@@ -1269,7 +1286,7 @@ int main(){
                                 if (cin.fail()){
                                     cin.clear();
                                     cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                                    throw invalid_argument("(Input harus berupa angka, ketuk enter untuk kembali)");
+                                    throw invalid_argument("(Input harus berupa angka/input terlalu besar, ketuk enter untuk kembali)");
                                 }
                                 
                                 if (cin.peek() != '\n' && !cin.eof()){
@@ -1334,7 +1351,7 @@ int main(){
                                 if (cin.fail()){
                                     cin.clear();
                                     cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                                    throw invalid_argument("(Input harus berupa angka, ketuk enter untuk kembali)");
+                                    throw invalid_argument("(Input harus berupa angka/input terlalu besar, ketuk enter untuk kembali)");
                                 }
                                 
                                 if (cin.peek() != '\n' && !cin.eof()){
@@ -1396,7 +1413,7 @@ int main(){
                 if (cin.fail()){
                     cin.clear();
                     cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                    throw invalid_argument("(Input harus berupa angka, ketuk enter untuk kembali)");
+                    throw invalid_argument("(Input harus berupa angka/input terlalu besar, ketuk enter untuk kembali)");
                 }
     
                 if (cin.peek() != '\n' && !cin.eof()){
@@ -1436,7 +1453,7 @@ int main(){
                                 if (cin.fail()){
                                     cin.clear();
                                     cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                                    throw invalid_argument("(Input harus berupa angka, ketuk enter untuk kembali)");
+                                    throw invalid_argument("(Input harus berupa angka/input terlalu besar, ketuk enter untuk kembali)");
                                 }
     
                                 if (cin.peek() != '\n' && !cin.eof()){
@@ -1495,7 +1512,7 @@ int main(){
                                 if (cin.fail()){
                                     cin.clear();
                                     cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                                    throw invalid_argument("(Input harus berupa angka, ketuk enter untuk kembali)");
+                                    throw invalid_argument("(Input harus berupa angka/input terlalu besar, ketuk enter untuk kembali)");
                                 }
     
                                 if (cin.peek() != '\n' && !cin.eof()){
@@ -1537,7 +1554,7 @@ int main(){
                         break;
 
                     case 9:
-                        pop(riwayatBattle, &hapusRiwayat, &top);
+                        hapusRiwayat(riwayatBattle, &tampung_riwayat, &top);
                         break;
 
                     default:
