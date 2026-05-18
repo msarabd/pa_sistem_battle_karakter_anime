@@ -28,7 +28,7 @@ struct stat{
 };
 
 struct karakter{
-    int id;
+    long long id; // PERBAIKAN 1: Menggunakan long long untuk ID
     string nama;
     string anime;
     stat stats;
@@ -47,37 +47,69 @@ struct stack{
     double ovr;
 };
 
+// ================= HELPER INPUT & UTILS =================
 
 void cls(){
-    #ifdef _WIN32
-        system("cls");
-    #else
-        cout << "\033[2J\033[1;1H";
+#ifdef _WIN32
+    system("cls");
+#else
+    cout << "\033[2J\033[1;1H";
 #endif
 }
 
 string trim(const string& str) {
     size_t first = str.find_first_not_of(" \t\n\r");
     if (first == string::npos) return "";
-
     size_t last = str.find_last_not_of(" \t\n\r");
     return str.substr(first, (last - first + 1));
 }
 
+// PERBAIKAN 2 & 3: Fungsi validasi input angka murni (menolak 90+4, spasi, dll)
+long long inputLongLong(const string& prompt) {
+    string raw;
+    cout << OREN << prompt << RESET;
+    if (!getline(cin, raw)) throw runtime_error("(Gagal membaca input)");
+    raw = trim(raw); // Hapus spasi kiri/kanan
+    if (raw.empty()) throw invalid_argument("(Input tidak boleh kosong)");
+    
+    // Validasi: hanya boleh digit
+    for (char c : raw) {
+        if (!isdigit(c)) throw invalid_argument("(Input harus berupa angka murni (tanpa simbol/spasi tambahan))");
+    }
+    // Cek overflow 64-bit
+    if (raw.length() > 18) throw out_of_range("(Angka terlalu besar untuk diproses)");
+    return stoll(raw);
+}
+
+double inputDoubleRange(const string& prompt, double minVal, double maxVal) {
+    string raw;
+    cout << OREN << prompt << RESET;
+    if (!getline(cin, raw)) throw runtime_error("(Gagal membaca input)");
+    raw = trim(raw); // Hapus spasi kiri/kanan
+    if (raw.empty()) throw invalid_argument("(Input tidak boleh kosong)");
+
+    bool hasDot = false;
+    for (size_t i = 0; i < raw.length(); ++i) {
+        if (i == 0 && raw[i] == '-') continue;
+        if (raw[i] == '.') {
+            if (hasDot) throw invalid_argument("(Format desimal tidak valid)");
+            hasDot = true;
+        } else if (!isdigit(raw[i])) {
+            throw invalid_argument("(Input harus berupa angka murni (tanpa simbol/spasi tambahan))");
+        }
+    }
+    double val = stod(raw);
+    if (val < minVal || val > maxVal) {
+        throw out_of_range("(Nilai harus antara " + to_string(minVal) + " sampai " + to_string(maxVal) + ")");
+    }
+    return val;
+}
+
 void enterKembali() {
     cout << KUNING << "\n(Ketuk enter untuk kembali)" << RESET;
-    
-    // 1. Membersihkan error state jika ada
-    cin.clear(); 
-    
-    // 2. Membersihkan sisa buffer (seperti spasi atau karakter tak terpakai)
-    // Jika buffer kosong, ini tidak akan menunggu. Jika ada isinya, ini akan menghapusnya.
-    if (cin.rdbuf()->in_avail() > 0) {
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
-    }
-
-    // 3. Benar-benar menunggu input Enter dari user
-    cin.get(); 
+    cin.clear();
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    cin.get();
 }
 
 void progressBar(){
@@ -85,11 +117,8 @@ void progressBar(){
     int panjangBar = 50;
     char kosong = 177;
     char isi = 219;
-
-    cout << "\nLoading...\n\n";
-    for (int i = 0; i < panjangBar; i++)
-        cout << kosong;
-
+    cout << "\nLoading...\n";
+    for (int i = 0; i < panjangBar; i++) cout << kosong;
     cout << "\r";
     for (int i = 0; i < panjangBar; i++) {
         cout << BIRU << isi << flush << RESET;
@@ -103,19 +132,12 @@ void iklan(string array[], int jumlahIklan){
     int seconds = 5;
     int index = rand() % jumlahIklan;
     cout << BIRU << array[index] << RESET << endl;
-    
     while (seconds >= 0) {
         cout << BIRU << "Lewati iklan dalam: " << seconds << " detik" << flush << RESET;
         this_thread::sleep_for(chrono::seconds(1));
-        cout << "\r"; 
+        cout << "\r";
         seconds--;
     }
-
-    // for (int i = 0; i <= 100; i++) {
-    //     std::cout << BIRU << "Progress: " << i << "%" << std::flush << RESET;
-    //     std::this_thread::sleep_for(std::chrono::milliseconds(10));
-    // }
-    
     cout << KUNING << "(Ketuk enter untuk lanjut) " << RESET;
     cin.get();
 }
@@ -123,17 +145,18 @@ void iklan(string array[], int jumlahIklan){
 void tampilkan(string menu, int a, int b){
     cls();
     cout << OREN << menu;
-    cout << "Pilih (" << a << "-" << b << "): " << RESET; 
+    cout << "Pilih (" << a << "-" << b << "): " << RESET;
 }
 
 void tampilkan(string kata){
-    cout << OREN << kata << RESET << endl ;
+    cout << OREN << kata << RESET << endl;
 }
+
+// ================= LOGIC UTAMA =================
 
 string cekUser(akun arr[], string tampung, int panjang_user){
     for (int i = 0; i < panjang_user; i++){
         if (tampung == arr[i].user){
-            cin.ignore();
             cout << MERAH << "(Username sudah ada, ketuk enter untuk kembali)" << RESET;
             cin.get();
             tampung = "0";
@@ -144,16 +167,18 @@ string cekUser(akun arr[], string tampung, int panjang_user){
 
 int loginUser(akun arr[], int& sisa_login, bool& token_utama, bool& token_login, int panjang_user, string header){
     string input_user, input_pw;
-
     cls();
     tampilkan(header);
+    
+    // PERBAIKAN 3: Menggunakan getline + trim untuk string
     cout << OREN << "Masukkan username: " << RESET;
     getline(cin, input_user);
     input_user = trim(input_user);
+    
     cout << OREN << "Masukkan password: " << RESET;
     getline(cin, input_pw);
     input_pw = trim(input_pw);
-    
+
     for (int i = 0; i < panjang_user; i++){
         if (input_user == arr[i].user){
             if (input_pw == arr[i].pw){
@@ -161,7 +186,6 @@ int loginUser(akun arr[], int& sisa_login, bool& token_utama, bool& token_login,
                 token_login = false;
                 cout << HIJAU << "(Login berhasil, ketuk enter untuk lanjut)" << RESET;
                 cin.get();
-                progressBar();
                 return i;
             } else {
                 sisa_login--;
@@ -170,40 +194,37 @@ int loginUser(akun arr[], int& sisa_login, bool& token_utama, bool& token_login,
                 break;
             }
         }
-
         if (i == panjang_user - 1){
             sisa_login--;
-            cout << MERAH "(User tidak ditemukan, sisa login Anda = " << sisa_login << ")" << RESET;
+            cout << MERAH << "(User tidak ditemukan, sisa login Anda = " << sisa_login << ")" << RESET;
             cin.get();
         }
     }
-
-    if (sisa_login == 0){
-        return -1;
-    }
-
+    if (sisa_login == 0) return -1;
     return loginUser(arr, sisa_login, token_utama, token_login, panjang_user, header);
 }
 
 void registerUser(akun arr[], string header, int* panjang_user){
-    string tampung;
-    string input_user;
-    string kode;
-
+    string input_user, input_pw, kode;
     cls();
     tampilkan(header);
-    cout << OREN << "Masukkan username: " << RESET;
-    cin >> tampung;
-    input_user = cekUser(arr, tampung, *panjang_user);
     
+    cout << OREN << "Masukkan username: " << RESET;
+    getline(cin, input_user);
+    input_user = trim(input_user);
+    
+    input_user = cekUser(arr, input_user, *panjang_user);
     if (input_user != "0"){
         arr[*panjang_user].user = input_user;
+        
         cout << OREN << "Masukkan password: " << RESET;
-        cin >> arr[*panjang_user].pw;
+        getline(cin, input_pw);
+        input_pw = trim(input_pw);
+        arr[*panjang_user].pw = input_pw;
         
         cout << OREN << "Masukkan kode referral: " << RESET;
-        cin >> kode;
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        getline(cin, kode);
+        kode = trim(kode);
         
         if (kode == "OnyxSmarid"){
             arr[*panjang_user].status = "premium";
@@ -213,7 +234,6 @@ void registerUser(akun arr[], string header, int* panjang_user){
             cout << MERAH << "(MAAP KODE REFERRAL ANDA SALAH!!)" << RESET << endl;
         }
         (*panjang_user)++;
-        
         cout << HIJAU << "\n(Berhasil membuat akun, silahkan login kembali)" << RESET;
         cin.get();
     }
@@ -224,33 +244,30 @@ void tampilKarakter(karakter arr[], int panjang_karakter){
     if (panjang_karakter == 0){
         cout << MERAH << "(List kosong, tidak ada data yang bisa dilihat)" << RESET;
         cin.get();
-
     } else {
         cout << KUNING << setfill('=') << setw(145) << "=" << endl;
         cout << setfill(' ');
-        cout << "| " << left << setw(4)  << "No" 
-            << "| " << setw(8) << "ID"
-            << "| " << setw(25) << "Nama Karakter"
-            << "| " << setw(18) << "Seri" 
-            << "| " << setw(14)  << "Attack Power" 
-            << "| " << setw(7)  << "Speed" 
-            << "| " << setw(12)  << "Durability" 
-            << "| " << setw(5)  << "IQ"
-            << "| " << setw(32) << "Keterangan" << " |" << endl;
-
+        cout << "| " << left << setw(4)  << "No"
+             << "| " << setw(10) << "ID"
+             << "| " << setw(25) << "Nama Karakter"
+             << "| " << setw(18) << "Seri"
+             << "| " << setw(14)  << "Attack Power"
+             << "| " << setw(7)  << "Speed"
+             << "| " << setw(12)  << "Durability"
+             << "| " << setw(5)  << "IQ"
+             << "| " << setw(32) << "Keterangan" << " |" << endl;
         cout << setfill('-') << setw(145) << "-" << endl;
-        cout << setfill(' '); 
-
+        cout << setfill(' ');
         for (int i = 0; i < panjang_karakter; i++) {
             cout << "| " << left << setw(4) << (i + 1)
-                << "| " << setw(8) << arr[i].id
-                << "| " << setw(25) << arr[i].nama
-                << "| " << setw(18) << arr[i].anime
-                << "| " << setw(14)  << arr[i].stats.ap 
-                << "| " << setw(7)  << arr[i].stats.sp 
-                << "| " << setw(12)  << arr[i].stats.du 
-                << "| " << setw(5)  << arr[i].stats.iq
-                << "| " << setw(32) << arr[i].ket << " |" << endl;
+                 << "| " << setw(10) << arr[i].id
+                 << "| " << setw(25) << arr[i].nama
+                 << "| " << setw(18) << arr[i].anime
+                 << "| " << setw(14)  << arr[i].stats.ap
+                 << "| " << setw(7)  << arr[i].stats.sp
+                 << "| " << setw(12)  << arr[i].stats.du
+                 << "| " << setw(5)  << arr[i].stats.iq
+                 << "| " << setw(32) << arr[i].ket << " |" << endl;
         }
         cout << setfill('=') << setw(145) << "=" << endl;
         cout << setfill(' ');
@@ -260,199 +277,127 @@ void tampilKarakter(karakter arr[], int panjang_karakter){
 }
 
 void tambahKarakter(karakter arr[], int* panjang_karakter){
-    int jumlah_tambah;
-
     cls();
     if (*panjang_karakter >= max_karakter){
         cout << MERAH << "(List sudah penuh, hapus satu atau lebih karakter)" << RESET;
         cin.get();
-
-    } else {
-        cout << OREN << "Mau tambah berapa karakter: " << RESET;
-        cin >> jumlah_tambah;
+        return;
+    }
+    
+    try {
+        // PERBAIKAN 1, 2, 3: Menggunakan fungsi input yang aman
+        long long jumlah_tambah = inputLongLong("Mau tambah berapa karakter: ");
         
-        try{
-            if (cin.fail()){
-                cin.clear();
-                cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                throw invalid_argument("(Input harus berupa angka/input terlalu besar, ketuk enter untuk kembali)");
-            }
-
-            if (cin.peek() != '\n' && !cin.eof()){
-                cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                throw invalid_argument("(Input tidak boleh desimal/huruf, ketuk enter untuk kembali)");
-            }
-
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            if (jumlah_tambah > 0){
-                for (int i = 0; i < jumlah_tambah; i++){
-                    cout << OREN << "\nKarakter ke-" << i + 1 << endl;
-                    cout << "Nama karakter: " << RESET;
-                    getline(cin, arr[*panjang_karakter].nama);
-                    arr[*panjang_karakter].nama = trim(arr[*panjang_karakter].nama);
-
-                    cout << OREN << "Dari anime/manga: " << RESET;
-                    getline(cin, arr[*panjang_karakter].anime);
-                    arr[*panjang_karakter].anime = trim(arr[*panjang_karakter].anime);
-                    
-                    cout << OREN << "Attack power (0-100): " << RESET;
-                    cin >> arr[*panjang_karakter].stats.ap;
-                    cout << OREN << "Speed (0-100): " << RESET;
-                    cin >> arr[*panjang_karakter].stats.sp;
-                    cout << OREN << "Durability (0-100): " << RESET;
-                    cin >> arr[*panjang_karakter].stats.du;
-                    cout << OREN << "IQ (0-100): " << RESET;
-                    cin >> arr[*panjang_karakter].stats.iq;
-                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
-
-                    cout << OREN << "Keterangan (isi '-' jika kosong): " << RESET;
-                    getline(cin, arr[*panjang_karakter].ket);
-                    arr[*panjang_karakter].ket = trim(arr[*panjang_karakter].ket);
-
-                    arr[*panjang_karakter].id = 2500 + *panjang_karakter + 1;
-                    cout << HIJAU << "(Berhasil menambahkan karakter)" << RESET << endl;
-                    (*panjang_karakter)++;
-                }
-
-                enterKembali();
-
-            } else {
-                cout << MERAH << "(Maaf, input tidak valid)" << RESET;
-                cin.get();
-            }
+        if (jumlah_tambah <= 0) throw invalid_argument("Jumlah harus > 0");
+        if (jumlah_tambah + *panjang_karakter > max_karakter) {
+            throw out_of_range("(List melebihi batas, hapus satu atau lebih karakter)");
         }
         
-        catch (exception& e){
-            cout << MERAH << e.what() << RESET;
-            cin.get();
+        for (long long i = 0; i < jumlah_tambah; i++){
+            cout << OREN << "\nKarakter ke-" << i + 1 << endl;
+            
+            cout << "Nama karakter: " << RESET;
+            getline(cin, arr[*panjang_karakter].nama);
+            arr[*panjang_karakter].nama = trim(arr[*panjang_karakter].nama);
+            
+            cout << OREN << "Dari anime/manga: " << RESET;
+            getline(cin, arr[*panjang_karakter].anime);
+            arr[*panjang_karakter].anime = trim(arr[*panjang_karakter].anime);
+            
+            // PERBAIKAN 2: Validasi stat secara ketat (90+4 akan ditolak)
+            arr[*panjang_karakter].stats.ap = inputDoubleRange("Attack power (0-100): ", 0, 100);
+            arr[*panjang_karakter].stats.sp = inputDoubleRange("Speed (0-100): ", 0, 100);
+            arr[*panjang_karakter].stats.du = inputDoubleRange("Durability (0-100): ", 0, 100);
+            arr[*panjang_karakter].stats.iq = inputDoubleRange("IQ (0-100): ", 0, 100);
+            
+            cout << OREN << "Keterangan (isi '-' jika kosong): " << RESET;
+            getline(cin, arr[*panjang_karakter].ket);
+            arr[*panjang_karakter].ket = trim(arr[*panjang_karakter].ket);
+            
+            arr[*panjang_karakter].id = 2500 + *panjang_karakter + 1;
+            cout << HIJAU << "(Berhasil menambahkan karakter)" << RESET << endl;
+            (*panjang_karakter)++;
         }
+        enterKembali();
+    } catch (const exception& e) {
+        cout << MERAH << e.what() << RESET;
+        cin.get();
     }
 }
 
 void perbaruiKarakter(karakter arr[], int panjang_karakter){
-    int jumlah_update;
-    int elemen;
-
     cls();
     if (panjang_karakter == 0){
         cout << MERAH << "(List kosong, tidak ada data yang bisa diperbarui)" << RESET;
         cin.get();
-
-    } else {
-        cout << OREN << "Mau perbarui berapa karakter: " << RESET;
-        cin >> jumlah_update;
+        return;
+    }
+    
+    try {
+        long long jumlah_update = inputLongLong("Mau perbarui berapa karakter: ");
+        if (jumlah_update <= 0 || jumlah_update > panjang_karakter) {
+            throw out_of_range("(Jumlah karakter hanya ada " + to_string(panjang_karakter) + ")");
+        }
         
-        try{
-            if (cin.fail()){
-                cin.clear();
-                cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                throw invalid_argument("(Input harus berupa angka/input terlalu besar, ketuk enter untuk kembali)");
-            }
-
-            if (cin.peek() != '\n' && !cin.eof()){
-                cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                throw invalid_argument("(Input tidak boleh desimal/huruf, ketuk enter untuk kembali)");
-            }
-
-            if (jumlah_update > panjang_karakter){
-                cout << MERAH << "(Jumlah karakter hanya ada " << panjang_karakter << ")" << RESET;
-                cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                cin.get();
-
-            } else if (jumlah_update > 0){
-                for (int i = 0; i < jumlah_update; i++){
-                    cout << OREN << "\nKarakter ke-" << i + 1 << RESET << endl;
-                    cout << OREN << "Masukkan nomor karakter: " << RESET;
-                    cin >> elemen;
-                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
-
-                    if (elemen > 0 && elemen <= panjang_karakter){
-                        cout << OREN << "Nama karakter: " << RESET;
-                        getline(cin, arr[elemen - 1].nama);
-                        arr[elemen - 1].nama = trim(arr[elemen - 1].nama);
-
-                        cout << OREN << "Dari anime/manga: " << RESET;
-                        getline(cin, arr[elemen - 1].anime);
-                        arr[elemen - 1].anime = trim(arr[elemen - 1].anime);
-                        
-                        cout << OREN << "Attack power (0-100): " << RESET;
-                        cin >> arr[elemen - 1].stats.ap;
-                        cout << OREN << "Speed (0-100): " << RESET;
-                        cin >> arr[elemen - 1].stats.sp;
-                        cout << OREN << "Durability (0-100): " << RESET;
-                        cin >> arr[elemen - 1].stats.du;
-                        cout << OREN << "IQ (0-100): " << RESET;
-                        cin >> arr[elemen - 1].stats.iq;
-                        cin.ignore(numeric_limits<streamsize>::max(), '\n');
-
-                        cout << OREN << "Keterangan (isi '-' jika kosong): " << RESET;
-                        getline(cin, arr[elemen - 1].ket);
-                        arr[elemen - 1].ket = trim(arr[elemen - 1].ket);
-                        cout << HIJAU << "(Data karakter berhasil diperbarui)" << RESET << endl;
-                    } else {
-                        cout << MERAH << "(Maaf, nomor karakter tidak valid)" << RESET;
-                        cin.get();
-                    }
-                }
-
-                enterKembali();
+        for (long long i = 0; i < jumlah_update; i++){
+            cout << OREN << "\nKarakter ke-" << i + 1 << RESET << endl;
+            long long elemen = inputLongLong("Masukkan nomor karakter: ");
+            
+            if (elemen > 0 && elemen <= panjang_karakter){
+                int idx = (int)elemen - 1;
+                cout << OREN << "Nama karakter: " << RESET;
+                getline(cin, arr[idx].nama);
+                arr[idx].nama = trim(arr[idx].nama);
                 
+                cout << OREN << "Dari anime/manga: " << RESET;
+                getline(cin, arr[idx].anime);
+                arr[idx].anime = trim(arr[idx].anime);
+                
+                arr[idx].stats.ap = inputDoubleRange("Attack power (0-100): ", 0, 100);
+                arr[idx].stats.sp = inputDoubleRange("Speed (0-100): ", 0, 100);
+                arr[idx].stats.du = inputDoubleRange("Durability (0-100): ", 0, 100);
+                arr[idx].stats.iq = inputDoubleRange("IQ (0-100): ", 0, 100);
+                
+                cout << OREN << "Keterangan (isi '-' jika kosong): " << RESET;
+                getline(cin, arr[idx].ket);
+                arr[idx].ket = trim(arr[idx].ket);
+                
+                cout << HIJAU << "(Data karakter berhasil diperbarui)" << RESET << endl;
             } else {
-                cout << MERAH << "(Maaf, input tidak valid)" << RESET;
-                cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                cin.get();
+                throw invalid_argument("(Maaf, nomor karakter tidak valid)");
             }
         }
-
-        catch (exception& e){
-            cout << MERAH << e.what() << RESET;
-            cin.get();
-        }
+        enterKembali();
+    } catch (const exception& e) {
+        cout << MERAH << e.what() << RESET;
+        cin.get();
     }
 }
 
 void hapusKarakter(karakter arr[], int *panjang_karakter){
-    int elemen;
-
     cls();
     if (*panjang_karakter == 0){
         cout << MERAH << "(List kosong, tidak ada data yang bisa dihapus)" << RESET;
         cin.get();
-
-    } else {
-        cout << OREN << "Masukkan nomor karakter: " << RESET;
-        cin >> elemen;
-        
-        try{
-            if (cin.fail()){
-                cin.clear();
-                cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                throw invalid_argument("(Input harus berupa angka/input terlalu besar, ketuk enter untuk kembali)");
+        return;
+    }
+    
+    try {
+        long long elemen = inputLongLong("Masukkan nomor karakter: ");
+        if (elemen > 0 && elemen <= *panjang_karakter){
+            int idx = (int)elemen - 1;
+            cout << HIJAU << "(" << arr[idx].nama << " berhasil dihapus, ketuk enter untuk kembali)" << RESET;
+            for (int i = idx; i < *panjang_karakter - 1; i++){
+                arr[i] = arr[i + 1];
             }
-
-            if (cin.peek() != '\n' && !cin.eof()){
-                cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                throw invalid_argument("(Input tidak boleh desimal/huruf, ketuk enter untuk kembali)");
-            }
-            
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            if (elemen > 0 && elemen <= *panjang_karakter){
-                cout << HIJAU << "(" << arr[elemen - 1].nama << " berhasil dihapus, ketuk enter untuk kembali)" << RESET;
-                for (int i = elemen - 1; i < *panjang_karakter - 1; i++){
-                    arr[i] = arr[i + 1];
-                }
-                (*panjang_karakter)--;
-            } else {
-                cout << MERAH << "(Maaf, nomor karakter tidak valid)" << RESET;
-            }
-            
-            cin.get();
+            (*panjang_karakter)--;
+        } else {
+            throw invalid_argument("(Maaf, nomor karakter tidak valid)");
         }
-
-        catch (exception& e){
-            cout << MERAH << e.what() << RESET;
-            cin.get();
-        }
+        enterKembali();
+    } catch (const exception& e) {
+        cout << MERAH << e.what() << RESET;
+        cin.get();
     }
 }
 
@@ -464,70 +409,41 @@ void swap(karakter* a, karakter* b){
 
 void bubleSort(karakter arr[], string atribut, int panjang){
     cls();
-
     if (panjang == 0){
         cout << MERAH << "(List kosong, tidak ada data yang bisa disorting)" << RESET;
-        cin.get();
-        return;
+        cin.get(); return;
     }
-    
-
     for (int i = 0; i < panjang - 1; i++){
         for (int j = 0; j < panjang - 1 - i; j++){
-            if (arr[j].nama > arr[j + 1].nama){
-                swap(&arr[j], &arr[j + 1]);
-            }
+            if (arr[j].nama > arr[j + 1].nama) swap(&arr[j], &arr[j + 1]);
         }
     }
-
     cout << HIJAU << "(Sorting by nama karakter berhasil, silahkan lihat pada menu read)" << RESET;
     cin.get();
 }
 
-int max(karakter arr[], string atribut, int batas_bawah, int panjang){
+int maxIdx(karakter arr[], string atribut, int batas_bawah, int panjang){
     int index_max = batas_bawah;
     for (int i = batas_bawah; i < panjang; i++){
-        if (atribut == "AP"){
-            if (arr[i].stats.ap > arr[index_max].stats.ap){
-                index_max = i;
-            }
-        
-        } else if (atribut == "SP"){
-            if (arr[i].stats.sp > arr[index_max].stats.sp){
-                index_max = i;
-            }
-        
-        } else if (atribut == "DU"){
-            if (arr[i].stats.du > arr[index_max].stats.du){
-                index_max = i;
-            }
-        
-        } else if (atribut == "IQ"){
-            if (arr[i].stats.iq > arr[index_max].stats.iq){
-                index_max = i;
-            }
-        
-        }
+        if (atribut == "AP" && arr[i].stats.ap > arr[index_max].stats.ap) index_max = i;
+        else if (atribut == "SP" && arr[i].stats.sp > arr[index_max].stats.sp) index_max = i;
+        else if (atribut == "DU" && arr[i].stats.du > arr[index_max].stats.du) index_max = i;
+        else if (atribut == "IQ" && arr[i].stats.iq > arr[index_max].stats.iq) index_max = i;
     }
-
     return index_max;
 }
 
 void selectionSort(karakter arr[], string atribut, int panjang){
     int index_max;
-
     cls();
     if (panjang == 0){
-        cout << MERAH << "(List kosong, tidak ada data yang bisa disorting)" << RESET; 
-        cin.get();
-        return;
+        cout << MERAH << "(List kosong, tidak ada data yang bisa disorting)" << RESET;
+        cin.get(); return;
     }
-    
     for (int i = 0; i < panjang - 1; i++){
-        index_max = max(arr, atribut, i, panjang);
+        index_max = maxIdx(arr, atribut, i, panjang);
         swap(&arr[i], &arr[index_max]);
     }
-    
     cout << HIJAU << "(Sorting by " << atribut << " dari terbesar ke terkecil berhasil, silahkan lihat pada menu read)" << RESET;
     cin.get();
 }
@@ -536,21 +452,17 @@ void insertionSort(karakter arr[], string atribut, int panjang){
     cls();
     if (panjang == 0){
         cout << MERAH << "(List kosong, tidak ada data yang bisa disorting)" << RESET;
-        cin.get();
-        return;
+        cin.get(); return;
     }
-
     for (int i = 1; i < panjang; i++){
         karakter key = arr[i];
         int j = i - 1;
-
         while (j >= 0 && arr[j].anime > key.anime){
             arr[j + 1] = arr[j];
             j--;
         }
         arr[j + 1] = key;
     }
-
     cout << HIJAU << "(Sorting by nama seri/anime berhasil, silahkan lihat pada menu read)" << RESET;
     cin.get();
 }
@@ -558,113 +470,72 @@ void insertionSort(karakter arr[], string atribut, int panjang){
 void sortCustom(karakter arr[], int panjang){
     for (int i = 0; i < panjang - 1; i++){
         for (int j = 0; j < panjang - 1 - i; j++){
-            if (arr[j].id > arr[j + 1].id){
-                swap(&arr[j], &arr[j + 1]);
-            }
+            if (arr[j].id > arr[j + 1].id) swap(&arr[j], &arr[j + 1]);
         }
     }
 }
 
 void linearSearch(karakter* arr, int* panjang){
     string target;
-
     cls();
     cout << OREN << "Masukkan nama karakter yang ingin dicari: " << RESET;
     getline(cin, target);
     target = trim(target);
-
     for (int i = 0; i < *panjang; i++){
         cout << OREN << "\n== iterasi ke-" << i + 1 << " ==" << RESET << endl;
-
         if (target == (arr + i)->nama){
             cout << OREN << target << " = " << (arr + i)->nama << RESET << endl;
             cout << HIJAU << "(" << target << " ditemukan pada indeks ke-" << i << ")" << RESET;
-            cin.get();
-            return;
+            cin.get(); return;
         } else {
             cout << OREN << target  << " != " << (arr + i)->nama << RESET << endl;
             cout << MERAH << "(tidak ditemukan)" << RESET << endl;
         }
     }
-    
-    cout << MERAH << "\n(" << target << " tidak ditemukan pada data karakter" << ")" << RESET;
+    cout << MERAH << "\n(" << target << " tidak ditemukan pada data karakter)" << RESET;
     cin.get();
 }
 
 void fibonacciSearch(karakter* arr, int* panjang){
-    int fib = 1;
-    int fib1 = 1;
-    int fib2 = 0;
-    int offset = -1;
-    int index;
-    int target;
-    
+    int fib = 1, fib1 = 1, fib2 = 0, offset = -1, index, j = 1;
     cls();
     sortCustom(arr, *panjang);
     cout << OREN << "Masukkan ID karakter yang ingin dicari: " << RESET;
-    cin >> target;
     
-    try{
-        if (cin.fail()){
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            throw invalid_argument("(Input harus berupa angka/input terlalu besar, ketuk enter untuk kembali)");
-        }
-
-        if (cin.peek() != '\n' && !cin.eof()){
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            throw invalid_argument("(Input tidak boleh desimal/huruf, ketuk enter untuk kembali)");
-        }
-
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    try {
+        long long target = inputLongLong("");
         while (fib < *panjang){
             fib2 = fib1;
             fib1 = fib;
             fib = fib1 + fib2;
         }
-
-        int j = 1;
         while (fib > 1){
             cout << OREN << "\n== iterasi ke-" << j << " ==" << RESET << endl;
             index = min(offset + fib2, *panjang - 1);
             if ((arr + index)->id == target){
                 cout << OREN << (arr + index)->id << " = " << target << RESET << endl;
                 cout << HIJAU << "("<< target << " ditemukan pada index ke-" << index << ")" << RESET;
-                cin.get();
-                return;
+                cin.get(); return;
             } else if ((arr + index)->id < target){
                 cout << OREN << (arr + index)->id << " < " << target << RESET << endl;
-                fib = fib1;
-                fib1 = fib2;
-                fib2 = fib - fib1;
-                offset = index;
+                fib = fib1; fib1 = fib2; fib2 = fib - fib1; offset = index;
             } else {
                 cout << OREN << (arr + index)->id << " > " << target << RESET << endl;
-                fib = fib2;
-                fib1 = fib1 - fib2;
-                fib2 = fib - fib1;
+                fib = fib2; fib1 = fib1 - fib2; fib2 = fib - fib1;
             }
-
             cout << MERAH << "(tidak ditemukan)" << RESET << endl;
             j++;
         }
-
-        cout << MERAH << "\n(ID " << target << " tidak ditemukan pada data karakter)" << RESET; 
+        cout << MERAH << "\n(ID " << target << " tidak ditemukan pada data karakter)" << RESET;
         cin.get();
-    }
-    
-    catch (exception& e){
+    } catch (const exception& e) {
         cout << MERAH << e.what() << RESET;
-        cin.get();
+        enterKembali();
     }
 }
 
 void push(stack riwayatBattle[], int* top, string battle, string pemenang, double ovr){
-    if (*top == 99){
-        cout << MERAH << "(Stack penuh)" << RESET;
-        return;
-    }
-
+    if (*top == 99){ cout << MERAH << "(Stack penuh)" << RESET; return; }
     (*top)++;
     riwayatBattle[*top].battle = battle;
     riwayatBattle[*top].pemenang = pemenang;
@@ -673,95 +544,50 @@ void push(stack riwayatBattle[], int* top, string battle, string pemenang, doubl
 
 void hapusRiwayat(stack riwayatBattle[], stack* tampung_riwayat, int* top){
     cls();
-
     if (*top == -1){
         cout << MERAH << "(Tidak ada riwayat yang bisa dihapus, ketuk enter untuk kembali)" << RESET;
-        cin.get();
-        return;
+        cin.get(); return;
     }
     tampung_riwayat->battle = riwayatBattle[*top].battle;
     tampung_riwayat->pemenang = riwayatBattle[*top].pemenang;
     tampung_riwayat->ovr = riwayatBattle[*top].ovr;
-
+    
     cout << KUNING;
-    cout << "=================== RIWAYAT DIHAPUS ===================\n\n";
-
+    cout << "=================== RIWAYAT DIHAPUS ===================\n";
     cout << setfill('=') << setw(101) << "=" << endl;
     cout << setfill(' ');
-
-    cout << "| " << left << setw(4) << "No"
-        << "| " << setw(45) << "Battle"
-        << "| " << setw(25) << "Pemenang"
-        << "| " << setw(18) << "OVR"
-        << "|" << endl;
-
+    cout << "| " << left << setw(4) << "No" << "| " << setw(45) << "Battle"
+         << "| " << setw(25) << "Pemenang" << "| " << setw(18) << "OVR" << "|" << endl;
     cout << setfill('-') << setw(101) << "-" << endl;
     cout << setfill(' ');
-
-    cout << "| " << left << setw(4) << 1
-
-        << "| " << setw(45)
-        << tampung_riwayat->battle
-
-        << "| " << setw(25)
-        << tampung_riwayat->pemenang
-
-        << "| " << setw(18)
-        << tampung_riwayat->ovr
-
-        << "|" << endl;
-
+    cout << "| " << left << setw(4) << 1 << "| " << setw(45) << tampung_riwayat->battle
+         << "| " << setw(25) << tampung_riwayat->pemenang << "| " << setw(18) << tampung_riwayat->ovr << "|" << endl;
     cout << setfill('=') << setw(101) << "=" << endl;
     cout << setfill(' ');
     cout << RESET;
-
     (*top)--;
-
     enterKembali();
 }
 
 void tampilRiwayat(stack riwayatBattle[], int top){
     cls();
-
     if (top == -1){
         cout << MERAH << "(Belum ada riwayat, ketuk enter untuk kembali)" << RESET;
-        cin.get();
-        return;
+        cin.get(); return;
     }
     cout << KUNING;
-    cout << "=================== RIWAYAT BATTLE ===================\n\n";
-
+    cout << "=================== RIWAYAT BATTLE ===================\n";
     cout << setfill('=') << setw(101) << "=" << endl;
     cout << setfill(' ');
-
-    cout << "| " << left << setw(4) << "No"
-        << "| " << setw(45) << "Battle"
-        << "| " << setw(25) << "Pemenang"
-        << "| " << setw(18) << "OVR"
-        << "|" << endl;
-
+    cout << "| " << left << setw(4) << "No" << "| " << setw(45) << "Battle"
+         << "| " << setw(25) << "Pemenang" << "| " << setw(18) << "OVR" << "|" << endl;
     cout << setfill('-') << setw(101) << "-" << endl;
     cout << setfill(' ');
-
     int nomor = 1;
-
     for (int i = top; i >= 0; i--){
-
-        cout << "| " << left << setw(4)
-            << nomor++
-
-            << "| " << setw(45)
-            << riwayatBattle[i].battle
-
-            << "| " << setw(25)
-            << riwayatBattle[i].pemenang
-
-            << "| " << setw(18)
-            << riwayatBattle[i].ovr
-
-            << "|" << endl;
+        cout << "| " << left << setw(4) << nomor++ << "| " << setw(45) << riwayatBattle[i].battle
+             << "| " << setw(25) << riwayatBattle[i].pemenang << "| " << setw(18) << riwayatBattle[i].ovr << "|" << endl;
     }
-
     cout << setfill('=') << setw(101) << "=" << endl;
     cout << setfill(' ');
     cout << RESET;
@@ -769,19 +595,12 @@ void tampilRiwayat(stack riwayatBattle[], int top){
 }
 
 double hitungSkor(stat &s){
-    return (s.ap * 0.30) + 
-           (s.sp * 0.20) + 
-           (s.du * 0.35) + 
-           (s.iq * 0.15);
+    return (s.ap * 0.30) + (s.sp * 0.20) + (s.du * 0.35) + (s.iq * 0.15);
 }
 
 void efekLoading(string teks){
     cout << teks;
-    for (int i = 0; i < 3; i++) {
-        cout << ".";
-        cout.flush();
-        this_thread::sleep_for(chrono::milliseconds(500));
-    }
+    for (int i = 0; i < 3; i++) { cout << "."; cout.flush(); this_thread::sleep_for(chrono::milliseconds(500)); }
     cout << endl;
 }
 
@@ -789,106 +608,62 @@ void duel(karakter& a, karakter& b, stack riwayatBattle[], int* top){
     srand(time(0));
     double skorA = hitungSkor(a.stats);
     double skorB = hitungSkor(b.stats);
-
     skorA *= (0.96 + (rand() % 5) / 100.0);
     skorB *= (0.96 + (rand() % 5) / 100.0);
     
     cout << OREN;
     cout << "\n=====================================\n";
-    cout << " ARENA DUEL ANIME \n";
-    cout << "=====================================\n\n";
-
+    cout << " ARENA DUEL ANIME\n";
+    cout << "=====================================\n";
     cout << ">> " << a.nama << " (" << a.ket << ") dari " << a.anime << endl;
     cout << "   VS\n";
     cout << ">> " << b.nama << " (" << b.ket << ") dari " << b.anime << endl;
-
     cout << "\n=====================================\n";
     efekLoading("Pertarungan dimulai");
-
-    cout << "\n  Statistik Duel  \n";
-    cout << a.nama << " [AP:" << a.stats.ap << " SP:" << a.stats.sp 
-        << " DU:" << a.stats.du << " IQ:" << a.stats.iq << "]\n";
-    cout << b.nama << " [AP:" << b.stats.ap << " SP:" << b.stats.sp 
-        << " DU:" << b.stats.du << " IQ:" << b.stats.iq << "]\n";
-
-    cout << "\n  Skor Pertarungan  \n";
+    cout << "\nStatistik Duel\n";
+    cout << a.nama << " [AP:" << a.stats.ap << " SP:" << a.stats.sp << " DU:" << a.stats.du << " IQ:" << a.stats.iq << "]\n";
+    cout << b.nama << " [AP:" << b.stats.ap << " SP:" << b.stats.sp << " DU:" << b.stats.du << " IQ:" << b.stats.iq << "]\n";
+    cout << "\nSkor Pertarungan\n";
     cout << a.nama << ": " << skorA << endl;
     cout << b.nama << ": " << skorB << endl;
-
-        string battle;
-        string pemenang;
-        double ovr;
-        battle = a.nama + " VS " + b.nama;
-        if (skorA > skorB) {
-            cout << " Pemenang: " << a.nama << " !!!" << endl;
-            pemenang = a.nama;
-            ovr = skorA;
-
-        } else if (skorB > skorA) {
-            cout << " Pemenang: " << b.nama << " !!!" << endl;
-            pemenang = b.nama;
-            ovr = skorB;
-
-        } else {
-            cout << " Hasil seri! Pertarungan berakhir imbang." << endl;
-            pemenang = "DRAW";
-        }
-        push(riwayatBattle, top, battle, pemenang, ovr);
+    
+    string battle, pemenang;
+    double ovr = 0;
+    battle = a.nama + " VS " + b.nama;
+    if (skorA > skorB) { cout << " Pemenang: " << a.nama << " !!!" << endl; pemenang = a.nama; ovr = skorA; }
+    else if (skorB > skorA) { cout << " Pemenang: " << b.nama << " !!!" << endl; pemenang = b.nama; ovr = skorB; }
+    else { cout << " Hasil seri! Pertarungan berakhir imbang." << endl; pemenang = "DRAW"; }
+    push(riwayatBattle, top, battle, pemenang, ovr);
     cout << "=====================================" << RESET << endl;
 }
 
 void battleKarakter(karakter karakterAnime[], int& jumlah_karakter, stack riwayatBattle[], int* top){
-    int pilihan1, pilihan2;
     cls();
-
     try {
-        cout << OREN << "Pilih karakter pertama (nomor): " << RESET;
-        if (!(cin >> pilihan1)){
-            cin.clear(); 
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            throw invalid_argument("(Input harus berupa angka/input terlalu besar, ketuk enter untuk kembali)");
-        }
+        long long pilihan1 = inputLongLong("Pilih karakter pertama (nomor): ");
+        long long pilihan2 = inputLongLong("Pilih karakter kedua (nomor): ");
         
-        if (cin.peek() != '\n' && !cin.eof()){
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            throw invalid_argument("(Input tidak boleh desimal/huruf, ketuk enter untuk kembali)");
-        }
-
-        cout << OREN << "Pilih karakter kedua (nomor): " << RESET;
-        if (!(cin >> pilihan2)){
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            throw invalid_argument("(Input harus berupa angka/input terlalu besar, ketuk enter untuk kembali)");
-        }
-
-        if (cin.peek() != '\n' && !cin.eof()){
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            throw invalid_argument("(Input tidak boleh desimal/huruf, ketuk enter untuk kembali)");
-        }
-
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
         if (pilihan1 >= 1 && pilihan1 <= jumlah_karakter &&
             pilihan2 >= 1 && pilihan2 <= jumlah_karakter &&
             pilihan1 != pilihan2) {
-            duel(karakterAnime[pilihan1-1], karakterAnime[pilihan2-1], riwayatBattle, top);
+            duel(karakterAnime[(int)pilihan1-1], karakterAnime[(int)pilihan2-1], riwayatBattle, top);
             enterKembali();
         } else {
-            cout << MERAH << "(Maaf, input tidak valid)" << RESET;
-            cin.get();
+            throw invalid_argument("(Maaf, input tidak valid atau karakter sama)");
         }
-    }
-
-    catch (exception& e){
+    } catch (const exception& e) {
         cout << MERAH << e.what() << RESET;
-        cin.get();
+        enterKembali();
     }
 }
 
+// ================= MAIN =================
 int main(){
     akun pengguna[max_akun] = {{"mahdi", "067", "biasa"}, {"andi", "123", "premium"}};
-    stack riwayatBattle[100]; 
+    stack riwayatBattle[100];
     stack tampung_riwayat;
     int top = -1;
+    
     karakter karakterAnime[max_karakter] = {
         {2501, "Megumi Hayashida", "Crows", {100, 92, 100, 88}, "Rindaman / Tak Terkalahkan"},
         {2502, "Bouya Harumichi", "Crows", {99, 94, 98, 85}, "Padiko / Serigala Penyendiri"},
@@ -910,7 +685,6 @@ int main(){
         {2518, "Masa Shioda", "Worst", {88, 85, 90, 83}, "Anggota Inti TFOA"},
         {2519, "Hosei Tsukimoto", "Worst", {89, 92, 88, 86}, "Tsukimoto Brother / Petarung"},
         {2520, "Shoji Rikiya", "Crows Zero", {91, 86, 93, 82}, "Benteng Serizawa Army"},
-
         {2521, "Manjiro Sano", "Tokyo Revengers", {100, 100, 95, 86}, "Invincible Mikey"},
         {2522, "Izana Kurokawa", "Tokyo Revengers", {97, 100, 92, 88}, "Pemimpin Tenjiku"},
         {2523, "Terano South", "Tokyo Revengers", {100, 93, 100, 83}, "Unrivaled / Rokuhara"},
@@ -931,7 +705,6 @@ int main(){
         {2538, "Ran Haitani", "Tokyo Revengers", {89, 92, 88, 90}, "Haitani Brother (Kakak)"},
         {2539, "Rindo Haitani", "Tokyo Revengers", {88, 93, 87, 89}, "Haitani Brother (Adik)"},
         {2540, "Kokonoi Hajime", "Tokyo Revengers", {83, 89, 85, 99}, "Koko / Jenius Finansial"},
-
         {2541, "Kohaku", "High & Low", {99, 94, 98, 92}, "Mugen Leader / Legenda"},
         {2542, "Amamiya Masaki", "High & Low", {99, 96, 97, 89}, "Amamiya Brother / Karate"},
         {2543, "Amamiya Hiroto", "High & Low", {98, 98, 95, 90}, "Amamiya Brother / Boxing"},
@@ -952,7 +725,6 @@ int main(){
         {2558, "Phoenix", "High & Low", {93, 97, 92, 90}, "Sawayama / Housen Shitenno"},
         {2559, "Tsukasa Takajo", "High & Low", {90, 91, 91, 90}, "Oya High / Partner Fujio"},
         {2560, "Jamuo", "High & Low", {70, 75, 78, 95}, "Informan Setia Oya High"},
-
         {2561, "Ricardo Martinez", "Hajime no Ippo", {100, 100, 100, 100}, "Dewa Tinju / Juara Dunia"},
         {2562, "Mamoru Takamura", "Hajime no Ippo", {100, 98, 100, 95}, "6-Class Conqueror"},
         {2563, "Makunouchi Ippo", "Hajime no Ippo", {99, 89, 100, 87}, "Wind God / Retired"},
@@ -973,7 +745,6 @@ int main(){
         {2578, "Jason Ozuma", "Hajime no Ippo", {93, 89, 91, 83}, "Hook Spesialis / Tulus"},
         {2579, "Saeki Akira", "Hajime no Ippo", {84, 99, 82, 92}, "Speed Star Orisinil"},
         {2580, "Aoki Masaru", "Hajime no Ippo", {82, 80, 90, 91}, "Raja Trik / Frog Punch"},
-
         {2581, "Hajime Umesamiya", "Wind Breaker", {98, 95, 98, 96}, "Pemimpin Bofurin"},
         {2582, "Chika Takiishi", "Wind Breaker", {100, 99, 96, 89}, "The Noroshi Calamity"},
         {2583, "Endo", "Wind Breaker", {96, 98, 93, 94}, "Tangan Kanan Takiishi"},
@@ -995,79 +766,69 @@ int main(){
         {2599, "Anzai", "Wind Breaker", {85, 86, 84, 85}, "Anggota Pendukung Furin"},
         {2600, "Nagame", "Wind Breaker", {86, 88, 85, 87}, "Anggota Pendukung Furin"}
     };
-
-        string iklanA = R"(==========================================================================
-
-
-   /\
-  /  \
-  \  /                                                      _________
- ./  \.      NASI CUMI HITAM MADURA PAK KRIS              /           \
-  \__/  Specialis Nasi Cumi Hitam BERTELOR Asli Madura   |   ~ ~ ~ ~   |
-  /||\     instagram @cumipakkris||@nasicumi             |   ~ ~ ~ ~   |
- / || \                                                   \___________/
-   ||
-   ||
-
-
+    
+    string iklanA = R"(==========================================================================
+/\
+/  \
+\  /                                                      _________
+./  \.      NASI CUMI HITAM MADURA PAK KRIS              /           \
+\__/  Specialis Nasi Cumi Hitam BERTELOR Asli Madura   |   ~ ~ ~ ~   |
+/||\     instagram @cumipakkris||@nasicumi             |   ~ ~ ~ ~   |
+/ || \                                                   \___________/
+||
+||
 ==========================================================================
 )";
-
     string iklanB = R"(!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-       .........
-    ...         ...
-   .               .
-  .                 .
- .        ...        .
+.........
+...         ...
+.               .
+.                 .
+.        ...        .
 .        .   .        .     Kipas angin TURBO JET 2000
 .       .     .       .         dengan kemampuan dingin maksimal
 .        .   .        .             sensasi ditiup angin mesin jet
- .        ...        .                  mendinginkan ruangan besar dan luas
-  .                 .
-   .               .
-    ...         ...
-       .........
-           .
-           .
-           .                SEGERA BELI SEBELUM KEHABISAN
-           .                    HANYA DI BAGO GO SHOP
-           .
-          . .
-         .   .
-         .   .
-        .     .
-       .........
-
+.        ...        .                  mendinginkan ruangan besar dan luas
+.                 .
+.               .
+...         ...
+.........
+.
+.
+.                SEGERA BELI SEBELUM KEHABISAN
+.                    HANYA DI BAGO GO SHOP
+.
+. .
+.   .
+.   .
+.     .
+.........
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 )";
-
     string iklanC = R"(
-
-                 _______________________________
-             .-''                               ''-.
-          .-'                                       '-.
-        .'                                             '.
-       /                                                 \
-      /                                                   \
-     |     ___________________________________________     |
-     |    /                                           \    |
-     |   /                                             \   |
-     |  |        ===============================        |  |    =============================================
-     |  |        |                             |        |  |     | PARTAI FINAL UEFA CHAMPIONS LEAGUE 2026 |
-     |  |        |          PUSKAS             |        |  |     |   BAYERN MUNCHEN VS ATLETICO MADRID     |
-     |  |        |          ARENA              |        |  |     |              30 MEI 2026                |
-     |  |        |                             |        |  |     |    PUSKAS ARENA BUDAPHEST HUNGARIA      |
-     |  |        ===============================        |  |
-     |   \                                             /   |
-     |    \___________________________________________/    |
-      \                                                   /
-       \                                                 /
-        '.                                             .'
-          '-.                                       .-'
-             ''-._______________________________.-'' 
-
+_______________________________
+.-''                               ''-.
+.-'                                       '-.
+.'                                             '.
+/                                                 \
+/                                                   \
+|     ___________________________________________     |
+|    /                                           \    |
+|   /                                             \   |
+|  |        ===============================        |  |    =============================================
+|  |        |                             |        |  |     | PARTAI FINAL UEFA CHAMPIONS LEAGUE 2026 |
+|  |        |          PUSKAS             |        |  |     |   BAYERN MUNCHEN VS ATLETICO MADRID     |
+|  |        |          ARENA              |        |  |     |              30 MEI 2026                |
+|  |        |                             |        |  |     |    PUSKAS ARENA BUDAPHEST HUNGARIA      |
+|  |        ===============================        |  |
+|   \                                             /   |
+|    \___________________________________________/    |
+\                                                   /
+\                                                 /
+'.                                             .'
+'-.                                       .-'
+''-._______________________________.-''
 )";
-
     string iklanD = R"(
 +-------------------------------------------+
 |         +=======================+         |   SEGERA HADIR
@@ -1092,31 +853,30 @@ int main(){
 ||              Coming Soon                ||
 +\=========================================/+
 )";
-
     string iklanE = R"(
 ..........................................................
 .                                                        .
 .                                                        .  Bosan
 .           ________________________________             .  Butuh hiburan
 .          |                                |            .  Nyari yang asik
-.          | xx      x         x       x    |            .  
+.          | xx      x         x       x    |            .
 .          |   xx  xx           xx   xx     |            .  Dengerin lagu-lagu Marshmello
 .          |     xx               xxx       |            .  diberbagai kanal mendengar musik
 .          |   xx  xx            xx xx      |            .  Hiburan yang asik
 .          | xx      x         xx     x     |            .  Mendampingi kesibukan kalian
 .          |                                |            .  Menghilangkan kebosanan kalian
-.          |                                |            .  
-.          |                                |            .  Karena itu jangan lupa dengerin
-.          |     \                  /       |            .  "Marshmello" dengan berbagai musiknya 
-.          |      \                /        |            .  yang asik dan menyenangkan
-.          |       \______________/         |            .
-.          |                                |            .    x   x    X   X     X   X
-.          |________________________________|            .    \___/    \___/     \___/
+.          |                                |            .
+.          |     \                  /       |            .  Karena itu jangan lupa dengerin
+.          |      \                /        |            .  "Marshmello" dengan berbagai musiknya
+.          |       \______________/         |            .  yang asik dan menyenangkan
+.          |                                |            .
+.          |________________________________|            .    x   x    X   X     X   X
+.                                                        .    \___/    \___/     \___/
 .                                                        .
 .                                                        .
 ..........................................................
 )";
-
+    
     string menu_login = R"(=====================================
 |           LOGIN DULU YAA          |
 =====================================
@@ -1125,7 +885,6 @@ int main(){
 | 0) Keluar                         |
 =====================================
 )";
-
     string menu_biasa = R"(=================================
 |        MAU NGAPAIN CUY?       |
 =================================
@@ -1136,7 +895,6 @@ int main(){
 | 0) Keluar                     |
 =================================
 )";
-
     string menu_premium = R"(=================================
 |        MAU NGAPAIN CUY?       |
 =================================
@@ -1152,7 +910,6 @@ int main(){
 | 0) Keluar                     |
 =================================
 )";
-
     string menu_sorting = R"(=================================
 |          MENU SORTING         |
 =================================
@@ -1165,7 +922,6 @@ int main(){
 | 0) Kembali                    |
 =================================
 )";
-
     string menu_searching = R"(=================================
 |         MENU SEARCHING        |
 =================================
@@ -1174,401 +930,165 @@ int main(){
 | 0) Kembali                    |
 =================================
 )";
-
     string header_loginUser = R"(============================
 |           LOGIN          |
 ============================)";
-
     string header_register = R"(============================
 |         Register         |
 ============================)";
-
     string akhir_program = R"(===================================================
- ____   _   _   _____   _____   _   _   _____   _ 
- / ___| | | | || ____||_   _|| | | || ____|| |     
- \\___ \\ | | | ||  _|    | |  | |_| ||  _|  | |   
-  ___) || |_| || |___   | |  |  _  || |___ |_|     
- |____/  \\___/ |_____|  |_|  |_| |_||_____|(_)    
-                                                   
-            PROGRAM BERHASIL DISELESAIKAN          
+____   _   _   _____   _____   _   _   _____   _
+/ ___| | | | || ____||_   _|| | | || ____|| |
+\\___ \\ | | | ||  _|    | |  | |_| ||  _|  | |
+___) || |_| || |___   | |  |  _  || |___ |_|
+|____/  \\___/ |_____|  |_|  |_| |_||_____|(_)
+PROGRAM BERHASIL DISELESAIKAN
 ===================================================)";
-    
     string arrayIklan[5] = {iklanA, iklanB, iklanC, iklanD, iklanE};
-    int index_pengguna;
+    
+    int index_pengguna = 0;
     int panjang_karakter = 100;
     int panjang_user = 2;
     int sisa_login = 3;
-    int pilihan_1, pilihan_2, pilihan_3, pilihan_4;
     bool token_login = true;
     bool token_utama = false;
     bool token_sorting = false;
     bool token_searching = false;
+    
     srand(time(0));
-
     while (token_login && sisa_login > 0){
         tampilkan(menu_login, 0, 3);
-        cin >> pilihan_1;
-        
-        try{
-            if (cin.fail()){
-                cin.clear();
-                cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                throw invalid_argument("(Input harus berupa angka/input terlalu besar, ketuk enter untuk kembali)");
-            }
-
-            if (cin.peek() != '\n' && !cin.eof()){
-                cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                throw invalid_argument("(Input tidak boleh desimal/huruf, ketuk enter untuk kembali)");
-            }
-
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        try {
+            long long pilihan_1 = inputLongLong("");
             switch (pilihan_1){
-                case 0:
-                    token_login = false;
-                    break;
-                
-                case 1:
-                    index_pengguna = loginUser(pengguna, sisa_login, token_utama, token_login, panjang_user, header_loginUser);
-                    break;
-                
-                case 2:
-                    registerUser(pengguna, header_register, &panjang_user);
-                    break;
-            
-            default:
-                throw runtime_error("(Input tidak valid, ketuk enter untuk kembali)");
-            }   
-        } 
-        
-        catch (exception& e){
+                case 0: token_login = false; break;
+                case 1: index_pengguna = loginUser(pengguna, sisa_login, token_utama, token_login, panjang_user, header_loginUser); break;
+                case 2: registerUser(pengguna, header_register, &panjang_user); break;
+                default: throw runtime_error("(Input tidak valid, ketuk enter untuk kembali)");
+            }
+        } catch (const exception& e) {
             cout << MERAH << e.what() << RESET;
             cin.get();
+            // enterKembali();
         }
     }
     
-    if (pengguna[index_pengguna].status == "biasa"){
-        putarAnimasi();
+    if (index_pengguna != -1 && pengguna[index_pengguna].status == "biasa"){
         while (token_utama){
             tampilkan(menu_biasa, 0, 4);
-            cin >> pilihan_2;
-            
-            try{
-                if (cin.fail()){
-                    cin.clear();
-                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                    throw invalid_argument("(Input harus berupa angka/input terlalu besar, ketuk enter untuk kembali)");
-                }
-    
-                if (cin.peek() != '\n' && !cin.eof()){
-                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                    throw invalid_argument("(Input tidak boleh desimal/huruf, ketuk enter untuk kembali)");
-                }
-                
-                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            try {
+                long long pilihan_2 = inputLongLong("");
                 switch (pilihan_2){
-                    case 0:
-                        iklan(arrayIklan, 5);
-                        token_utama = false;
-                        break;
-        
-                    case 1:
-                        iklan(arrayIklan, 5);
-                        tampilKarakter(karakterAnime, panjang_karakter);
-                        break;
-        
+                    case 0: iklan(arrayIklan, 5); token_utama = false; break;
+                    case 1: iklan(arrayIklan, 5); tampilKarakter(karakterAnime, panjang_karakter); break;
                     case 2:
                         token_sorting = true;
                         while (token_sorting){
                             tampilkan(menu_sorting, 0, 6);
-                            cin >> pilihan_3;
-                            
-                            try{
-                                if (cin.fail()){
-                                    cin.clear();
-                                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                                    throw invalid_argument("(Input harus berupa angka/input terlalu besar, ketuk enter untuk kembali)");
-                                }
-                                
-                                if (cin.peek() != '\n' && !cin.eof()){
-                                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                                    throw invalid_argument("(Input tidak boleh desimal/huruf, ketuk enter untuk kembali)");
-                                };
-                                
-                                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                            try {
+                                long long pilihan_3 = inputLongLong("");
                                 switch (pilihan_3){
-                                    case 0:
-                                        token_sorting = false;
-                                        break;
-                                    case 1:
-                                        iklan(arrayIklan, 5);
-                                        bubleSort(karakterAnime, "nama", panjang_karakter);
-                                        token_sorting = false;
-                                        break;
-                                    case 2:
-                                        iklan(arrayIklan, 5);
-                                        insertionSort(karakterAnime, "anime", panjang_karakter);
-                                        token_sorting = false;
-                                        break;
-                                    case 3:
-                                        iklan(arrayIklan, 5);
-                                        selectionSort(karakterAnime, "AP", panjang_karakter);
-                                        token_sorting = false;
-                                        break;
-                                    case 4:
-                                        iklan(arrayIklan, 5);
-                                        selectionSort(karakterAnime, "SP", panjang_karakter);
-                                        token_sorting = false;
-                                        break;
-                                    case 5:
-                                        iklan(arrayIklan, 5);
-                                        selectionSort(karakterAnime, "DU", panjang_karakter);
-                                        token_sorting = false;
-                                        break;
-                                    case 6:
-                                        iklan(arrayIklan, 5);
-                                        selectionSort(karakterAnime, "IQ", panjang_karakter);
-                                        token_sorting = false;
-                                        break;
-                                    default:
-                                        throw runtime_error("(Input tidak valid, ketuk enter untuk kembali)");
-                                }   
-                            }
-    
-                            catch (exception& e){
+                                    case 0: token_sorting = false; break;
+                                    case 1: iklan(arrayIklan, 5); bubleSort(karakterAnime, "nama", panjang_karakter); token_sorting = false; break;
+                                    case 2: iklan(arrayIklan, 5); insertionSort(karakterAnime, "anime", panjang_karakter); token_sorting = false; break;
+                                    case 3: iklan(arrayIklan, 5); selectionSort(karakterAnime, "AP", panjang_karakter); token_sorting = false; break;
+                                    case 4: iklan(arrayIklan, 5); selectionSort(karakterAnime, "SP", panjang_karakter); token_sorting = false; break;
+                                    case 5: iklan(arrayIklan, 5); selectionSort(karakterAnime, "DU", panjang_karakter); token_sorting = false; break;
+                                    case 6: iklan(arrayIklan, 5); selectionSort(karakterAnime, "IQ", panjang_karakter); token_sorting = false; break;
+                                    default: throw runtime_error("(Input tidak valid, ketuk enter untuk kembali)");
+                                }
+                            } catch (const exception& e) {
                                 cout << MERAH << e.what() << RESET;
                                 cin.get();
                             }
-                        }
-                        break;
-        
+                        } break;
                     case 3:
                         token_searching = true;
                         while (token_searching){
                             tampilkan(menu_searching, 0, 2);
-                            cin >> pilihan_4;
-                            
-                            try{
-                                if (cin.fail()){
-                                    cin.clear();
-                                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                                    throw invalid_argument("(Input harus berupa angka/input terlalu besar, ketuk enter untuk kembali)");
-                                }
-                                
-                                if (cin.peek() != '\n' && !cin.eof()){
-                                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                                    throw invalid_argument("(Input tidak boleh desimal/huruf, ketuk enter untuk kembali)");
-                                }
-                                
-                                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                            try {
+                                long long pilihan_4 = inputLongLong("");
                                 switch (pilihan_4){
-                                    case 0:
-                                        iklan(arrayIklan, 5);
-                                        token_searching = false;
-                                        break;
-                                    case 1:
-                                        iklan(arrayIklan, 5);
-                                        linearSearch(karakterAnime, &panjang_karakter);
-                                        token_searching = false;
-                                        break;
-                                    case 2:
-                                        iklan(arrayIklan, 5);
-                                        fibonacciSearch(karakterAnime, &panjang_karakter);
-                                        token_searching = false;
-                                        break;
-                                    default:
-                                        throw runtime_error("(Input tidak valid, ketuk enter untuk kembali)");
-                                } 
-                            }
-    
-                            catch (exception& e){
+                                    case 0: iklan(arrayIklan, 5); token_searching = false; break;
+                                    case 1: iklan(arrayIklan, 5); linearSearch(karakterAnime, &panjang_karakter); token_searching = false; break;
+                                    case 2: iklan(arrayIklan, 5); fibonacciSearch(karakterAnime, &panjang_karakter); token_searching = false; break;
+                                    default: throw runtime_error("(Input tidak valid, ketuk enter untuk kembali)");
+                                }
+                            } catch (const exception& e) {
                                 cout << MERAH << e.what() << RESET;
                                 cin.get();
                             }
-                        }
-                        break;
-        
-                case 4:
-                    iklan(arrayIklan, 5);
-                    battleKarakter(karakterAnime, panjang_karakter, riwayatBattle, &top);
-                    break;
-
-                default:
-                    throw runtime_error("(Input tidak valid, ketuk enter untuk kembali)");
+                        } break;
+                    case 4: iklan(arrayIklan, 5); battleKarakter(karakterAnime, panjang_karakter, riwayatBattle, &top); break;
+                    default: throw runtime_error("(Input tidak valid, ketuk enter untuk kembali)");
                 }
-            }
-    
-            catch (exception& e){
+            } catch (const exception& e) {
                 cout << MERAH << e.what() << RESET;
                 cin.get();
+                // enterKembali();
             }
         }
-    
-    } else if (pengguna[index_pengguna].status == "premium"){
-        putarAnimasi();
+    } else if (index_pengguna != -1 && pengguna[index_pengguna].status == "premium"){
         while (token_utama){
             tampilkan(menu_premium, 0, 9);
-            cin >> pilihan_2;
-
-            try{
-                if (cin.fail()){
-                    cin.clear();
-                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                    throw invalid_argument("(Input harus berupa angka/input terlalu besar, ketuk enter untuk kembali)");
-                }
-    
-                if (cin.peek() != '\n' && !cin.eof()){
-                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                    throw invalid_argument("(Input tidak boleh desimal/huruf, ketuk enter untuk kembali)");
-                }
-                
-                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            try {
+                long long pilihan_2 = inputLongLong("");
                 switch (pilihan_2){
-                    case 0:
-                        token_utama = false;
-                        break;
-        
-                    case 1:
-                        tampilKarakter(karakterAnime, panjang_karakter);
-                        break;
-                    
-                    case 2:
-                        tambahKarakter(karakterAnime, &panjang_karakter);
-                        break;
-                        
-                    case 3:
-                        perbaruiKarakter(karakterAnime, panjang_karakter);
-                        break;
-                        
-                    case 4:
-                        hapusKarakter(karakterAnime, &panjang_karakter);
-                        break;
-                        
+                    case 0: token_utama = false; break;
+                    case 1: tampilKarakter(karakterAnime, panjang_karakter); break;
+                    case 2: tambahKarakter(karakterAnime, &panjang_karakter); break;
+                    case 3: perbaruiKarakter(karakterAnime, panjang_karakter); break;
+                    case 4: hapusKarakter(karakterAnime, &panjang_karakter); break;
                     case 5:
                         token_sorting = true;
                         while (token_sorting){
                             tampilkan(menu_sorting, 0, 6);
-                            cin >> pilihan_3;
-                            
-                            try{
-                                if (cin.fail()){
-                                    cin.clear();
-                                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                                    throw invalid_argument("(Input harus berupa angka/input terlalu besar, ketuk enter untuk kembali)");
-                                }
-    
-                                if (cin.peek() != '\n' && !cin.eof()){
-                                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                                    throw invalid_argument("(Input tidak boleh desimal/huruf, ketuk enter untuk kembali)");
-                                }
-
-                                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                            try {
+                                long long pilihan_3 = inputLongLong("");
                                 switch (pilihan_3){
-                                    case 0:
-                                        token_sorting = false;
-                                        break;
-                                    case 1:
-                                        bubleSort(karakterAnime, "nama", panjang_karakter);
-                                        token_sorting = false;
-                                        break;
-                                    case 2:
-                                        insertionSort(karakterAnime, "anime", panjang_karakter);
-                                        token_sorting = false;
-                                        break;
-                                    case 3:
-                                        selectionSort(karakterAnime, "AP", panjang_karakter);
-                                        token_sorting = false;
-                                        break;
-                                    case 4:
-                                        selectionSort(karakterAnime, "SP", panjang_karakter);
-                                        token_sorting = false;
-                                        break;
-                                    case 5:
-                                        selectionSort(karakterAnime, "DU", panjang_karakter);
-                                        token_sorting = false;
-                                        break;
-                                    case 6:
-                                        selectionSort(karakterAnime, "IQ", panjang_karakter);
-                                        token_sorting = false;
-                                        break;
-                                    default:
-                                        throw runtime_error("(Input tidak valid, ketuk enter untuk kembali)");
-                                }   
-                            }
-    
-                            catch (exception& e){
+                                    case 0: token_sorting = false; break;
+                                    case 1: bubleSort(karakterAnime, "nama", panjang_karakter); token_sorting = false; break;
+                                    case 2: insertionSort(karakterAnime, "anime", panjang_karakter); token_sorting = false; break;
+                                    case 3: selectionSort(karakterAnime, "AP", panjang_karakter); token_sorting = false; break;
+                                    case 4: selectionSort(karakterAnime, "SP", panjang_karakter); token_sorting = false; break;
+                                    case 5: selectionSort(karakterAnime, "DU", panjang_karakter); token_sorting = false; break;
+                                    case 6: selectionSort(karakterAnime, "IQ", panjang_karakter); token_sorting = false; break;
+                                    default: throw runtime_error("(Input tidak valid, ketuk enter untuk kembali)");
+                                }
+                            } catch (const exception& e) {
                                 cout << MERAH << e.what() << RESET;
                                 cin.get();
                             }
-                        }
-                        break;
-        
+                        } break;
                     case 6:
                         token_searching = true;
                         while (token_searching){
                             tampilkan(menu_searching, 0, 2);
-                            cin >> pilihan_4;
-                            
-                            try{
-                                if (cin.fail()){
-                                    cin.clear();
-                                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                                    throw invalid_argument("(Input harus berupa angka/input terlalu besar, ketuk enter untuk kembali)");
-                                }
-    
-                                if (cin.peek() != '\n' && !cin.eof()){
-                                    cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                                    throw invalid_argument("(Input tidak boleh desimal/huruf, ketuk enter untuk kembali)");
-                                }
-                                
-                                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                            try {
+                                long long pilihan_4 = inputLongLong("");
                                 switch (pilihan_4){
-                                    case 0:
-                                        token_searching = false;
-                                        break;
-                                    case 1:
-                                        linearSearch(karakterAnime, &panjang_karakter);
-                                        token_searching = false;
-                                        break;
-                                    case 2:
-                                        fibonacciSearch(karakterAnime, &panjang_karakter);
-                                        token_searching = false;
-                                        break;
-                                    default:
-                                        throw runtime_error("(Input tidak valid, ketuk enter untuk kembali)");
-                                } 
-                            }
-    
-                            catch (exception& e){
+                                    case 0: token_searching = false; break;
+                                    case 1: linearSearch(karakterAnime, &panjang_karakter); token_searching = false; break;
+                                    case 2: fibonacciSearch(karakterAnime, &panjang_karakter); token_searching = false; break;
+                                    default: throw runtime_error("(Input tidak valid, ketuk enter untuk kembali)");
+                                }
+                            } catch (const exception& e) {
                                 cout << MERAH << e.what() << RESET;
                                 cin.get();
                             }
-                        }
-                        break;
-
-                    case 7:
-                        battleKarakter(karakterAnime, panjang_karakter, riwayatBattle, &top);                    
-                        break;
-                    
-                    case 8:
-                        tampilRiwayat(riwayatBattle, top);
-                        break;
-
-                    case 9:
-                        hapusRiwayat(riwayatBattle, &tampung_riwayat, &top);
-                        break;
-
-                    default:
-                        throw runtime_error("(Input tidak valid, ketuk enter untuk kembali)");
+                        } break;
+                    case 7: battleKarakter(karakterAnime, panjang_karakter, riwayatBattle, &top); break;
+                    case 8: tampilRiwayat(riwayatBattle, top); break;
+                    case 9: hapusRiwayat(riwayatBattle, &tampung_riwayat, &top); break;
+                    default: throw runtime_error("(Input tidak valid, ketuk enter untuk kembali)");
                 }
-            }
-    
-            catch (exception& e){
+            } catch (const exception& e) {
                 cout << MERAH << e.what() << RESET;
                 cin.get();
+                // enterKembali();
             }
         }
     }
-
     cls();
     tampilkan(akhir_program);
     return 0;
