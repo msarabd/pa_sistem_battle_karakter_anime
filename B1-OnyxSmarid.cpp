@@ -28,7 +28,7 @@ struct stat{
 };
 
 struct karakter{
-    long long id; // PERBAIKAN 1: Menggunakan long long untuk ID
+    long long id;
     string nama;
     string anime;
     stat stats;
@@ -47,8 +47,6 @@ struct stack{
     double ovr;
 };
 
-// ================= HELPER INPUT & UTILS =================
-
 void cls(){
 #ifdef _WIN32
     system("cls");
@@ -64,19 +62,16 @@ string trim(const string& str) {
     return str.substr(first, (last - first + 1));
 }
 
-// PERBAIKAN 2 & 3: Fungsi validasi input angka murni (menolak 90+4, spasi, dll)
 long long inputLongLong(const string& prompt) {
     string raw;
     cout << OREN << prompt << RESET;
     if (!getline(cin, raw)) throw runtime_error("(Gagal membaca input)");
-    raw = trim(raw); // Hapus spasi kiri/kanan
+    raw = trim(raw);
     if (raw.empty()) throw invalid_argument("(Input tidak boleh kosong)");
     
-    // Validasi: hanya boleh digit
     for (char c : raw) {
         if (!isdigit(c)) throw invalid_argument("(Input harus berupa angka murni (tanpa simbol/spasi tambahan))");
     }
-    // Cek overflow 64-bit
     if (raw.length() > 18) throw out_of_range("(Angka terlalu besar untuk diproses)");
     return stoll(raw);
 }
@@ -85,7 +80,7 @@ double inputDoubleRange(const string& prompt, double minVal, double maxVal) {
     string raw;
     cout << OREN << prompt << RESET;
     if (!getline(cin, raw)) throw runtime_error("(Gagal membaca input)");
-    raw = trim(raw); // Hapus spasi kiri/kanan
+    raw = trim(raw);
     if (raw.empty()) throw invalid_argument("(Input tidak boleh kosong)");
 
     bool hasDot = false;
@@ -151,8 +146,6 @@ void tampilkan(string kata){
     cout << OREN << kata << RESET << endl;
 }
 
-// ================= LOGIC UTAMA =================
-
 string cekUser(akun arr[], string tampung, int panjang_user){
     for (int i = 0; i < panjang_user; i++){
         if (tampung == arr[i].user){
@@ -169,7 +162,6 @@ int loginUser(akun arr[], int& sisa_login, bool& token_utama, bool& token_login,
     cls();
     tampilkan(header);
     
-    // PERBAIKAN 3: Menggunakan getline + trim untuk string
     cout << OREN << "Masukkan username: " << RESET;
     getline(cin, input_user);
     input_user = trim(input_user);
@@ -244,7 +236,7 @@ void tampilKarakter(karakter arr[], int panjang_karakter){
         cout << MERAH << "(List kosong, tidak ada data yang bisa dilihat)" << RESET;
         cin.get();
     } else {
-        cout << KUNING << setfill('=') << setw(145) << "=" << endl;
+        cout << KUNING << setfill('=') << setw(147) << "=" << endl;
         cout << setfill(' ');
         cout << "| " << left << setw(4)  << "No"
              << "| " << setw(10) << "ID"
@@ -255,7 +247,7 @@ void tampilKarakter(karakter arr[], int panjang_karakter){
              << "| " << setw(12)  << "Durability"
              << "| " << setw(5)  << "IQ"
              << "| " << setw(32) << "Keterangan" << " |" << endl;
-        cout << setfill('-') << setw(145) << "-" << endl;
+        cout << setfill('-') << setw(147) << "-" << endl;
         cout << setfill(' ');
         for (int i = 0; i < panjang_karakter; i++) {
             cout << "| " << left << setw(4) << (i + 1)
@@ -268,7 +260,7 @@ void tampilKarakter(karakter arr[], int panjang_karakter){
                  << "| " << setw(5)  << arr[i].stats.iq
                  << "| " << setw(32) << arr[i].ket << " |" << endl;
         }
-        cout << setfill('=') << setw(145) << "=" << endl;
+        cout << setfill('=') << setw(147) << "=" << endl;
         cout << setfill(' ');
         cout << RESET;
         enterKembali();
@@ -540,7 +532,7 @@ void fibonacciSearch(karakter* arr, int panjang){
 }
 
 void push(stack riwayatBattle[], int* top, string battle, string pemenang, double ovr){
-    if (*top == 99){ cout << MERAH << "(Stack penuh)" << RESET; return; }
+    if (*top == 99){ cout << MERAH << "(Riwayat penuh)" << RESET << endl;; return; }
     (*top)++;
     riwayatBattle[*top].battle = battle;
     riwayatBattle[*top].pemenang = pemenang;
@@ -639,7 +631,7 @@ void duel(karakter& a, karakter& b, stack riwayatBattle[], int* top){
     else if (skorB > skorA) { cout << " Pemenang: " << b.nama << " !!!" << endl; pemenang = b.nama; ovr = skorB; }
     else { cout << " Hasil seri! Pertarungan berakhir imbang." << endl; pemenang = "DRAW"; }
     push(riwayatBattle, top, battle, pemenang, ovr);
-    cout << "=====================================" << RESET << endl;
+    cout << OREN << "=====================================" << RESET << endl;
 }
 
 void battleKarakter(karakter karakterAnime[], int& jumlah_karakter, stack riwayatBattle[], int* top){
@@ -662,7 +654,6 @@ void battleKarakter(karakter karakterAnime[], int& jumlah_karakter, stack riwaya
     }
 }
 
-// ================= MAIN =================
 int main(){
     akun pengguna[max_akun] = {{"mahdi", "067", "biasa"}, {"andi", "123", "premium"}};
     stack riwayatBattle[100];
@@ -974,7 +965,6 @@ PROGRAM BERHASIL DISELESAIKAN
         } catch (const exception& e) {
             cout << MERAH << e.what() << RESET;
             cin.get();
-            // enterKembali();
         }
     }
     
@@ -1030,7 +1020,6 @@ PROGRAM BERHASIL DISELESAIKAN
             } catch (const exception& e) {
                 cout << MERAH << e.what() << RESET;
                 cin.get();
-                // enterKembali();
             }
         }
     } else if (index_pengguna != -1 && pengguna[index_pengguna].status == "premium"){
@@ -1090,7 +1079,6 @@ PROGRAM BERHASIL DISELESAIKAN
             } catch (const exception& e) {
                 cout << MERAH << e.what() << RESET;
                 cin.get();
-                // enterKembali();
             }
         }
     }
