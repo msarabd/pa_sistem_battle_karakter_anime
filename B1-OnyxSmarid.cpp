@@ -108,7 +108,6 @@ double inputDoubleRange(const string& prompt, double minVal, double maxVal) {
 void enterKembali() {
     cout << KUNING << "\n(Ketuk enter untuk kembali)" << RESET;
     cin.clear();
-    cin.ignore(numeric_limits<streamsize>::max(), '\n');
     cin.get();
 }
 
@@ -475,13 +474,13 @@ void sortCustom(karakter arr[], int panjang){
     }
 }
 
-void linearSearch(karakter* arr, int* panjang){
+void linearSearch(karakter* arr, int panjang){
     string target;
     cls();
     cout << OREN << "Masukkan nama karakter yang ingin dicari: " << RESET;
     getline(cin, target);
     target = trim(target);
-    for (int i = 0; i < *panjang; i++){
+    for (int i = 0; i < panjang; i++){
         cout << OREN << "\n== iterasi ke-" << i + 1 << " ==" << RESET << endl;
         if (target == (arr + i)->nama){
             cout << OREN << target << " = " << (arr + i)->nama << RESET << endl;
@@ -496,22 +495,28 @@ void linearSearch(karakter* arr, int* panjang){
     cin.get();
 }
 
-void fibonacciSearch(karakter* arr, int* panjang){
+void fibonacciSearch(karakter* arr, int panjang){
     int fib = 1, fib1 = 1, fib2 = 0, offset = -1, index, j = 1;
     cls();
-    sortCustom(arr, *panjang);
+    sortCustom(arr, panjang);
     cout << OREN << "Masukkan ID karakter yang ingin dicari: " << RESET;
     
     try {
         long long target = inputLongLong("");
-        while (fib < *panjang){
+
+        if (target <= 0) throw invalid_argument("ID harus > 0");
+        if (target > 2500 + panjang){
+            throw out_of_range("(Input melebihi jumlah karakter)");
+        }
+
+        while (fib < panjang){
             fib2 = fib1;
             fib1 = fib;
             fib = fib1 + fib2;
         }
         while (fib > 1){
             cout << OREN << "\n== iterasi ke-" << j << " ==" << RESET << endl;
-            index = min(offset + fib2, *panjang - 1);
+            index = min(offset + fib2, panjang - 1);
             if ((arr + index)->id == target){
                 cout << OREN << (arr + index)->id << " = " << target << RESET << endl;
                 cout << HIJAU << "("<< target << " ditemukan pada index ke-" << index << ")" << RESET;
@@ -530,7 +535,7 @@ void fibonacciSearch(karakter* arr, int* panjang){
         cin.get();
     } catch (const exception& e) {
         cout << MERAH << e.what() << RESET;
-        enterKembali();
+        cin.get();
     }
 }
 
@@ -653,7 +658,7 @@ void battleKarakter(karakter karakterAnime[], int& jumlah_karakter, stack riwaya
         }
     } catch (const exception& e) {
         cout << MERAH << e.what() << RESET;
-        enterKembali();
+        cin.get();
     }
 }
 
@@ -1010,8 +1015,8 @@ PROGRAM BERHASIL DISELESAIKAN
                                 long long pilihan_4 = inputLongLong("");
                                 switch (pilihan_4){
                                     case 0: iklan(arrayIklan, 5); token_searching = false; break;
-                                    case 1: iklan(arrayIklan, 5); linearSearch(karakterAnime, &panjang_karakter); token_searching = false; break;
-                                    case 2: iklan(arrayIklan, 5); fibonacciSearch(karakterAnime, &panjang_karakter); token_searching = false; break;
+                                    case 1: iklan(arrayIklan, 5); linearSearch(karakterAnime, panjang_karakter); token_searching = false; break;
+                                    case 2: iklan(arrayIklan, 5); fibonacciSearch(karakterAnime, panjang_karakter); token_searching = false; break;
                                     default: throw runtime_error("(Input tidak valid, ketuk enter untuk kembali)");
                                 }
                             } catch (const exception& e) {
@@ -1068,8 +1073,8 @@ PROGRAM BERHASIL DISELESAIKAN
                                 long long pilihan_4 = inputLongLong("");
                                 switch (pilihan_4){
                                     case 0: token_searching = false; break;
-                                    case 1: linearSearch(karakterAnime, &panjang_karakter); token_searching = false; break;
-                                    case 2: fibonacciSearch(karakterAnime, &panjang_karakter); token_searching = false; break;
+                                    case 1: linearSearch(karakterAnime, panjang_karakter); token_searching = false; break;
+                                    case 2: fibonacciSearch(karakterAnime, panjang_karakter); token_searching = false; break;
                                     default: throw runtime_error("(Input tidak valid, ketuk enter untuk kembali)");
                                 }
                             } catch (const exception& e) {
