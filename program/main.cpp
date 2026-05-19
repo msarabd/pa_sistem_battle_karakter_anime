@@ -65,7 +65,7 @@ string trim(const string& str) {
 long long inputLongLong(const string& prompt) {
     string raw;
     cout << OREN << prompt << RESET;
-    if (!getline(cin, raw)) throw runtime_error("(Gagal membaca input)");
+    if (!getline(cin, raw)) exit(1);
     raw = trim(raw);
     if (raw.empty()) throw invalid_argument("(Input tidak boleh kosong)");
     
@@ -79,7 +79,7 @@ long long inputLongLong(const string& prompt) {
 double inputDoubleRange(const string& prompt, double minVal, double maxVal) {
     string raw;
     cout << OREN << prompt << RESET;
-    if (!getline(cin, raw)) throw runtime_error("(Gagal membaca input)");
+    if (!getline(cin, raw)) exit(1);
     raw = trim(raw);
     if (raw.empty()) throw invalid_argument("(Input tidak boleh kosong)");
 
@@ -177,6 +177,7 @@ int loginUser(akun arr[], int& sisa_login, bool& token_utama, bool& token_login,
                 token_login = false;
                 cout << HIJAU << "(Login berhasil, ketuk enter untuk lanjut)" << RESET;
                 cin.get();
+                progressBar();
                 return i;
             } else {
                 sisa_login--;
@@ -276,7 +277,6 @@ void tambahKarakter(karakter arr[], int* panjang_karakter){
     }
     
     try {
-        // PERBAIKAN 1, 2, 3: Menggunakan fungsi input yang aman
         long long jumlah_tambah = inputLongLong("Mau tambah berapa karakter: ");
         
         if (jumlah_tambah <= 0) throw invalid_argument("Jumlah harus > 0");
@@ -295,7 +295,6 @@ void tambahKarakter(karakter arr[], int* panjang_karakter){
             getline(cin, arr[*panjang_karakter].anime);
             arr[*panjang_karakter].anime = trim(arr[*panjang_karakter].anime);
             
-            // PERBAIKAN 2: Validasi stat secara ketat (90+4 akan ditolak)
             arr[*panjang_karakter].stats.ap = inputDoubleRange("Attack power (0-100): ", 0, 100);
             arr[*panjang_karakter].stats.sp = inputDoubleRange("Speed (0-100): ", 0, 100);
             arr[*panjang_karakter].stats.du = inputDoubleRange("Durability (0-100): ", 0, 100);
@@ -969,6 +968,7 @@ PROGRAM BERHASIL DISELESAIKAN
     }
     
     if (index_pengguna != -1 && pengguna[index_pengguna].status == "biasa"){
+        putarAnimasi();
         while (token_utama){
             tampilkan(menu_biasa, 0, 4);
             try {
@@ -1023,6 +1023,7 @@ PROGRAM BERHASIL DISELESAIKAN
             }
         }
     } else if (index_pengguna != -1 && pengguna[index_pengguna].status == "premium"){
+        putarAnimasi();
         while (token_utama){
             tampilkan(menu_premium, 0, 9);
             try {
