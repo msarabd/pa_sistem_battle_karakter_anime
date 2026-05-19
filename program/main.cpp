@@ -763,66 +763,73 @@ int main(){
     };
     
     string iklanA = R"(==========================================================================
-/\
-/  \
-\  /                                                      _________
-./  \.      NASI CUMI HITAM MADURA PAK KRIS              /           \
-\__/  Specialis Nasi Cumi Hitam BERTELOR Asli Madura   |   ~ ~ ~ ~   |
-/||\     instagram @cumipakkris||@nasicumi             |   ~ ~ ~ ~   |
-/ || \                                                   \___________/
-||
-||
+
+
+   /\
+  /  \
+  \  /                                                      _________
+ ./  \.      NASI CUMI HITAM MADURA PAK KRIS              /           \
+  \__/  Specialis Nasi Cumi Hitam BERTELOR Asli Madura   |   ~ ~ ~ ~   |
+  /||\     instagram @cumipakkris||@nasicumi             |   ~ ~ ~ ~   |
+ / || \                                                   \___________/
+   ||
+   ||
+
+
 ==========================================================================
 )";
     string iklanB = R"(!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-.........
-...         ...
-.               .
-.                 .
-.        ...        .
+       .........
+    ...         ...
+   .               .
+  .                 .
+ .        ...        .
 .        .   .        .     Kipas angin TURBO JET 2000
 .       .     .       .         dengan kemampuan dingin maksimal
 .        .   .        .             sensasi ditiup angin mesin jet
-.        ...        .                  mendinginkan ruangan besar dan luas
-.                 .
-.               .
-...         ...
-.........
-.
-.
-.                SEGERA BELI SEBELUM KEHABISAN
-.                    HANYA DI BAGO GO SHOP
-.
-. .
-.   .
-.   .
-.     .
-.........
+ .        ...        .                  mendinginkan ruangan besar dan luas
+  .                 .
+   .               .
+    ...         ...
+       .........
+           .
+           .
+           .                SEGERA BELI SEBELUM KEHABISAN
+           .                    HANYA DI BAGO GO SHOP
+           .
+          . .
+         .   .
+         .   .
+        .     .
+       .........
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 )";
     string iklanC = R"(
-_______________________________
-.-''                               ''-.
-.-'                                       '-.
-.'                                             '.
-/                                                 \
-/                                                   \
-|     ___________________________________________     |
-|    /                                           \    |
-|   /                                             \   |
-|  |        ===============================        |  |    =============================================
-|  |        |                             |        |  |     | PARTAI FINAL UEFA CHAMPIONS LEAGUE 2026 |
-|  |        |          PUSKAS             |        |  |     |   BAYERN MUNCHEN VS ATLETICO MADRID     |
-|  |        |          ARENA              |        |  |     |              30 MEI 2026                |
-|  |        |                             |        |  |     |    PUSKAS ARENA BUDAPHEST HUNGARIA      |
-|  |        ===============================        |  |
-|   \                                             /   |
-|    \___________________________________________/    |
-\                                                   /
-\                                                 /
-'.                                             .'
-'-.                                       .-'
-''-._______________________________.-''
+
+                 _______________________________
+             .-''                               ''-.
+          .-'                                       '-.
+        .'                                             '.
+       /                                                 \
+      /                                                   \
+     |     ___________________________________________     |
+     |    /                                           \    |
+     |   /                                             \   |
+     |  |        ===============================        |  |    =============================================
+     |  |        |                             |        |  |     | PARTAI FINAL UEFA CHAMPIONS LEAGUE 2026 |
+     |  |        |          PUSKAS             |        |  |     |   BAYERN MUNCHEN VS ATLETICO MADRID     |
+     |  |        |          ARENA              |        |  |     |              30 MEI 2026                |
+     |  |        |                             |        |  |     |    PUSKAS ARENA BUDAPHEST HUNGARIA      |
+     |  |        ===============================        |  |
+     |   \                                             /   |
+     |    \___________________________________________/    |
+      \                                                   /
+       \                                                 /
+        '.                                             .'
+          '-.                                       .-'
+             ''-._______________________________.-'' 
+
 )";
     string iklanD = R"(
 +-------------------------------------------+
