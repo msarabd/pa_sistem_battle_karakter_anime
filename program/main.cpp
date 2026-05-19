@@ -279,7 +279,7 @@ void tambahKarakter(karakter arr[], int* panjang_karakter){
     try {
         long long jumlah_tambah = inputLongLong("Mau tambah berapa karakter: ");
         
-        if (jumlah_tambah <= 0) throw invalid_argument("Jumlah harus > 0");
+        if (jumlah_tambah <= 0) throw invalid_argument("(Jumlah harus > 0)");
         if (jumlah_tambah + *panjang_karakter > max_karakter) {
             throw out_of_range("(List melebihi batas, hapus satu atau lebih karakter)");
         }
