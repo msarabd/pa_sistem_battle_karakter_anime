@@ -2336,7 +2336,7 @@
         <mxCell id="Y2lMl1GpMrlWrvVdfBbj-20" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontStyle=1" parent="1" source="Y2lMl1GpMrlWrvVdfBbj-21" target="Y2lMl1GpMrlWrvVdfBbj-5" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="Y2lMl1GpMrlWrvVdfBbj-21" value="&lt;span style=&quot;font-size: 24px;&quot;&gt;bubleSort&lt;/span&gt;" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.terminator;whiteSpace=wrap;fontStyle=1" parent="1" vertex="1">
+        <mxCell id="Y2lMl1GpMrlWrvVdfBbj-21" value="&lt;span style=&quot;font-size: 24px;&quot;&gt;bubbleSort&lt;/span&gt;" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.terminator;whiteSpace=wrap;fontStyle=1" parent="1" vertex="1">
           <mxGeometry x="105" y="90" width="150" height="50" as="geometry" />
         </mxCell>
         <mxCell id="Y2lMl1GpMrlWrvVdfBbj-22" value="&lt;span style=&quot;font-size: 24px;&quot;&gt;STOP&lt;/span&gt;" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.terminator;whiteSpace=wrap;fontStyle=1" parent="1" vertex="1">
