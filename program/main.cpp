@@ -20,7 +20,7 @@ using namespace std;
 const int max_karakter = 200;
 const int max_akun = 20;
 
-struct stat{
+struct statistik{
     double ap; // attack power
     double sp; // speed
     double du; // durability
@@ -31,7 +31,7 @@ struct karakter{
     long long id;
     string nama;
     string anime;
-    stat stats;
+    statistik stats;
     string ket;
 };
 
@@ -590,7 +590,7 @@ void tampilRiwayat(stack riwayatBattle[], int top){
     enterKembali();
 }
 
-double hitungSkor(stat &s){
+double hitungSkor(statistik &s){
     return (s.ap * 0.30) + (s.sp * 0.20) + (s.du * 0.35) + (s.iq * 0.15);
 }
 
