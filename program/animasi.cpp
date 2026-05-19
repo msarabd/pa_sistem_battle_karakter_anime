@@ -1306,7 +1306,7 @@ string frame7 = R"(
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@)";
 
     const int n = 27;
-    string array[n] = {
+    static const string array[n] = {
         frame1, frame2, frame3, frame4, 
         frame5, frame6, frame7, frame8, 
         frame9, frame10, frame11, frame12, 

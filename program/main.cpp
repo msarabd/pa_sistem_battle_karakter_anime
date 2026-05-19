@@ -3,7 +3,6 @@
 #include <cstdlib>
 #include <string>
 #include <cctype>
-#include <limits>
 #include <ctime>
 #include <thread>
 #include <chrono>
@@ -19,6 +18,7 @@ using namespace std;
 
 const int max_karakter = 200;
 const int max_akun = 20;
+const int max_riwayat = 100;
 
 struct statistik{
     double ap; // attack power
@@ -28,7 +28,7 @@ struct statistik{
 };
 
 struct karakter{
-    long long id;
+    int id;
     string nama;
     string anime;
     statistik stats;
@@ -62,18 +62,18 @@ string trim(const string& str) {
     return str.substr(first, (last - first + 1));
 }
 
-long long inputLongLong(const string& prompt) {
+int inputInt(const string& prompt) {
     string raw;
     cout << OREN << prompt << RESET;
     if (!getline(cin, raw)) exit(1);
     raw = trim(raw);
     if (raw.empty()) throw invalid_argument("(Input tidak boleh kosong)");
-    
     for (char c : raw) {
         if (!isdigit(c)) throw invalid_argument("(Input harus berupa angka murni (tanpa simbol/spasi tambahan))");
     }
-    if (raw.length() > 18) throw out_of_range("(Angka terlalu besar untuk diproses)");
-    return stoll(raw);
+    
+    if (raw.length() > 9) throw out_of_range("(Angka terlalu besar untuk diproses)");
+    return stoi(raw);
 }
 
 double inputDoubleRange(const string& prompt, double minVal, double maxVal) {
@@ -151,7 +151,7 @@ string cekUser(akun arr[], string tampung, int panjang_user){
         if (tampung == arr[i].user){
             cout << MERAH << "(Username sudah ada, ketuk enter untuk kembali)" << RESET;
             cin.get();
-            tampung = "0";
+            tampung = "-1";
         }
     }
     return tampung;
@@ -206,7 +206,7 @@ void registerUser(akun arr[], string header, int* panjang_user){
     input_user = trim(input_user);
     
     input_user = cekUser(arr, input_user, *panjang_user);
-    if (input_user != "0"){
+    if (input_user != "-1"){
         arr[*panjang_user].user = input_user;
         
         cout << OREN << "Masukkan password: " << RESET;
@@ -277,14 +277,14 @@ void tambahKarakter(karakter arr[], int* panjang_karakter){
     }
     
     try {
-        long long jumlah_tambah = inputLongLong("Mau tambah berapa karakter: ");
+        int jumlah_tambah = inputInt("Mau tambah berapa karakter: ");
         
         if (jumlah_tambah <= 0) throw invalid_argument("(Jumlah harus > 0)");
         if (jumlah_tambah + *panjang_karakter > max_karakter) {
             throw out_of_range("(List melebihi batas, hapus satu atau lebih karakter)");
         }
         
-        for (long long i = 0; i < jumlah_tambah; i++){
+        for (int i = 0; i < jumlah_tambah; i++){
             cout << OREN << "\nKarakter ke-" << i + 1 << endl;
             
             cout << "Nama karakter: " << RESET;
@@ -324,14 +324,15 @@ void perbaruiKarakter(karakter arr[], int panjang_karakter){
     }
     
     try {
-        long long jumlah_update = inputLongLong("Mau perbarui berapa karakter: ");
-        if (jumlah_update <= 0 || jumlah_update > panjang_karakter) {
+        int jumlah_update = inputInt("Mau perbarui berapa karakter: ");
+        if (jumlah_update <= 0) throw invalid_argument("(Jumlah harus > 0)");
+        if (jumlah_update > panjang_karakter) {
             throw out_of_range("(Jumlah karakter hanya ada " + to_string(panjang_karakter) + ")");
         }
         
-        for (long long i = 0; i < jumlah_update; i++){
+        for (int i = 0; i < jumlah_update; i++){
             cout << OREN << "\nKarakter ke-" << i + 1 << RESET << endl;
-            long long elemen = inputLongLong("Masukkan nomor karakter: ");
+            int elemen = inputInt("Masukkan nomor karakter: ");
             
             if (elemen > 0 && elemen <= panjang_karakter){
                 int idx = (int)elemen - 1;
@@ -373,10 +374,10 @@ void hapusKarakter(karakter arr[], int *panjang_karakter){
     }
     
     try {
-        long long elemen = inputLongLong("Masukkan nomor karakter: ");
+        int elemen = inputInt("Masukkan nomor karakter: ");
         if (elemen > 0 && elemen <= *panjang_karakter){
             int idx = (int)elemen - 1;
-            cout << HIJAU << "(" << arr[idx].nama << " berhasil dihapus, ketuk enter untuk kembali)" << RESET;
+            cout << HIJAU << "(" << arr[idx].nama << " berhasil dihapus, ketuk enter untuk kembali)" << RESET << endl;
             for (int i = idx; i < *panjang_karakter - 1; i++){
                 arr[i] = arr[i + 1];
             }
@@ -391,13 +392,13 @@ void hapusKarakter(karakter arr[], int *panjang_karakter){
     }
 }
 
-void swap(karakter* a, karakter* b){
+void tukarKarakter(karakter* a, karakter* b){
     karakter temp = *a;
     *a = *b;
     *b = temp;
 }
 
-void bubleSort(karakter arr[], string atribut, int panjang){
+void bubbleSort(karakter arr[], int panjang){
     cls();
     if (panjang == 0){
         cout << MERAH << "(List kosong, tidak ada data yang bisa disorting)" << RESET;
@@ -405,7 +406,7 @@ void bubleSort(karakter arr[], string atribut, int panjang){
     }
     for (int i = 0; i < panjang - 1; i++){
         for (int j = 0; j < panjang - 1 - i; j++){
-            if (arr[j].nama > arr[j + 1].nama) swap(&arr[j], &arr[j + 1]);
+            if (arr[j].nama > arr[j + 1].nama) tukarKarakter(&arr[j], &arr[j + 1]);
         }
     }
     cout << HIJAU << "(Sorting by nama karakter berhasil, silahkan lihat pada menu read)" << RESET;
@@ -432,13 +433,13 @@ void selectionSort(karakter arr[], string atribut, int panjang){
     }
     for (int i = 0; i < panjang - 1; i++){
         index_max = maxIdx(arr, atribut, i, panjang);
-        swap(&arr[i], &arr[index_max]);
+        tukarKarakter(&arr[i], &arr[index_max]);
     }
     cout << HIJAU << "(Sorting by " << atribut << " dari terbesar ke terkecil berhasil, silahkan lihat pada menu read)" << RESET;
     cin.get();
 }
 
-void insertionSort(karakter arr[], string atribut, int panjang){
+void insertionSort(karakter arr[], int panjang){
     cls();
     if (panjang == 0){
         cout << MERAH << "(List kosong, tidak ada data yang bisa disorting)" << RESET;
@@ -460,7 +461,7 @@ void insertionSort(karakter arr[], string atribut, int panjang){
 void sortCustom(karakter arr[], int panjang){
     for (int i = 0; i < panjang - 1; i++){
         for (int j = 0; j < panjang - 1 - i; j++){
-            if (arr[j].id > arr[j + 1].id) swap(&arr[j], &arr[j + 1]);
+            if (arr[j].id > arr[j + 1].id) tukarKarakter(&arr[j], &arr[j + 1]);
         }
     }
 }
@@ -493,9 +494,9 @@ void fibonacciSearch(karakter* arr, int panjang){
     cout << OREN << "Masukkan ID karakter yang ingin dicari: " << RESET;
     
     try {
-        long long target = inputLongLong("");
+        int target = inputInt("");
 
-        if (target <= 0) throw invalid_argument("ID harus > 0");
+        if (target <= 0) throw invalid_argument("(ID harus > 0)");
         if (target > 2500 + panjang){
             throw out_of_range("(Input melebihi jumlah karakter)");
         }
@@ -531,7 +532,7 @@ void fibonacciSearch(karakter* arr, int panjang){
 }
 
 void push(stack riwayatBattle[], int* top, string battle, string pemenang, double ovr){
-    if (*top == 99){ cout << MERAH << "(Riwayat penuh)" << RESET << endl;; return; }
+    if (*top == max_riwayat - 1){ cout << MERAH << "(Riwayat penuh)" << RESET << endl; return; }
     (*top)++;
     riwayatBattle[*top].battle = battle;
     riwayatBattle[*top].pemenang = pemenang;
@@ -601,7 +602,6 @@ void efekLoading(string teks){
 }
 
 void duel(karakter& a, karakter& b, stack riwayatBattle[], int* top){
-    srand(time(0));
     double skorA = hitungSkor(a.stats);
     double skorB = hitungSkor(b.stats);
     skorA *= (0.96 + (rand() % 5) / 100.0);
@@ -636,8 +636,8 @@ void duel(karakter& a, karakter& b, stack riwayatBattle[], int* top){
 void battleKarakter(karakter karakterAnime[], int& jumlah_karakter, stack riwayatBattle[], int* top){
     cls();
     try {
-        long long pilihan1 = inputLongLong("Pilih karakter pertama (nomor): ");
-        long long pilihan2 = inputLongLong("Pilih karakter kedua (nomor): ");
+        int pilihan1 = inputInt("Pilih karakter pertama (nomor): ");
+        int pilihan2 = inputInt("Pilih karakter kedua (nomor): ");
         
         if (pilihan1 >= 1 && pilihan1 <= jumlah_karakter &&
             pilihan2 >= 1 && pilihan2 <= jumlah_karakter &&
@@ -655,7 +655,7 @@ void battleKarakter(karakter karakterAnime[], int& jumlah_karakter, stack riwaya
 
 int main(){
     akun pengguna[max_akun] = {{"mahdi", "067", "biasa"}, {"andi", "123", "premium"}};
-    stack riwayatBattle[100];
+    stack riwayatBattle[max_riwayat];
     stack tampung_riwayat;
     int top = -1;
     
@@ -948,7 +948,7 @@ PROGRAM BERHASIL DISELESAIKAN
 ===================================================)";
     string arrayIklan[5] = {iklanA, iklanB, iklanC, iklanD, iklanE};
     
-    int index_pengguna = 0;
+    int index_pengguna = -1;
     int panjang_karakter = 100;
     int panjang_user = 2;
     int sisa_login = 3;
@@ -961,7 +961,7 @@ PROGRAM BERHASIL DISELESAIKAN
     while (token_login && sisa_login > 0){
         tampilkan(menu_login, 0, 3);
         try {
-            long long pilihan_1 = inputLongLong("");
+            int pilihan_1 = inputInt("");
             switch (pilihan_1){
                 case 0: token_login = false; break;
                 case 1: index_pengguna = loginUser(pengguna, sisa_login, token_utama, token_login, panjang_user, header_loginUser); break;
@@ -979,7 +979,7 @@ PROGRAM BERHASIL DISELESAIKAN
         while (token_utama){
             tampilkan(menu_biasa, 0, 4);
             try {
-                long long pilihan_2 = inputLongLong("");
+                int pilihan_2 = inputInt("");
                 switch (pilihan_2){
                     case 0: iklan(arrayIklan, 5); token_utama = false; break;
                     case 1: iklan(arrayIklan, 5); tampilKarakter(karakterAnime, panjang_karakter); break;
@@ -988,11 +988,11 @@ PROGRAM BERHASIL DISELESAIKAN
                         while (token_sorting){
                             tampilkan(menu_sorting, 0, 6);
                             try {
-                                long long pilihan_3 = inputLongLong("");
+                                int pilihan_3 = inputInt("");
                                 switch (pilihan_3){
                                     case 0: token_sorting = false; break;
-                                    case 1: iklan(arrayIklan, 5); bubleSort(karakterAnime, "nama", panjang_karakter); token_sorting = false; break;
-                                    case 2: iklan(arrayIklan, 5); insertionSort(karakterAnime, "anime", panjang_karakter); token_sorting = false; break;
+                                    case 1: iklan(arrayIklan, 5); bubbleSort(karakterAnime, panjang_karakter); token_sorting = false; break;
+                                    case 2: iklan(arrayIklan, 5); insertionSort(karakterAnime, panjang_karakter); token_sorting = false; break;
                                     case 3: iklan(arrayIklan, 5); selectionSort(karakterAnime, "AP", panjang_karakter); token_sorting = false; break;
                                     case 4: iklan(arrayIklan, 5); selectionSort(karakterAnime, "SP", panjang_karakter); token_sorting = false; break;
                                     case 5: iklan(arrayIklan, 5); selectionSort(karakterAnime, "DU", panjang_karakter); token_sorting = false; break;
@@ -1009,7 +1009,7 @@ PROGRAM BERHASIL DISELESAIKAN
                         while (token_searching){
                             tampilkan(menu_searching, 0, 2);
                             try {
-                                long long pilihan_4 = inputLongLong("");
+                                int pilihan_4 = inputInt("");
                                 switch (pilihan_4){
                                     case 0: iklan(arrayIklan, 5); token_searching = false; break;
                                     case 1: iklan(arrayIklan, 5); linearSearch(karakterAnime, panjang_karakter); token_searching = false; break;
@@ -1034,7 +1034,7 @@ PROGRAM BERHASIL DISELESAIKAN
         while (token_utama){
             tampilkan(menu_premium, 0, 9);
             try {
-                long long pilihan_2 = inputLongLong("");
+                int pilihan_2 = inputInt("");
                 switch (pilihan_2){
                     case 0: token_utama = false; break;
                     case 1: tampilKarakter(karakterAnime, panjang_karakter); break;
@@ -1046,11 +1046,11 @@ PROGRAM BERHASIL DISELESAIKAN
                         while (token_sorting){
                             tampilkan(menu_sorting, 0, 6);
                             try {
-                                long long pilihan_3 = inputLongLong("");
+                                int pilihan_3 = inputInt("");
                                 switch (pilihan_3){
                                     case 0: token_sorting = false; break;
-                                    case 1: bubleSort(karakterAnime, "nama", panjang_karakter); token_sorting = false; break;
-                                    case 2: insertionSort(karakterAnime, "anime", panjang_karakter); token_sorting = false; break;
+                                    case 1: bubbleSort(karakterAnime, panjang_karakter); token_sorting = false; break;
+                                    case 2: insertionSort(karakterAnime, panjang_karakter); token_sorting = false; break;
                                     case 3: selectionSort(karakterAnime, "AP", panjang_karakter); token_sorting = false; break;
                                     case 4: selectionSort(karakterAnime, "SP", panjang_karakter); token_sorting = false; break;
                                     case 5: selectionSort(karakterAnime, "DU", panjang_karakter); token_sorting = false; break;
@@ -1067,7 +1067,7 @@ PROGRAM BERHASIL DISELESAIKAN
                         while (token_searching){
                             tampilkan(menu_searching, 0, 2);
                             try {
-                                long long pilihan_4 = inputLongLong("");
+                                int pilihan_4 = inputInt("");
                                 switch (pilihan_4){
                                     case 0: token_searching = false; break;
                                     case 1: linearSearch(karakterAnime, panjang_karakter); token_searching = false; break;
